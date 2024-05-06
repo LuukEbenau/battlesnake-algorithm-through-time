@@ -84,7 +84,7 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
             previous = current;
         }
 
-        totalPath.sort();
+        totalPath.reverse();
         totalPath[0] = this.provider.outMapStart(startNode, start, goal);
 
         return totalPath;

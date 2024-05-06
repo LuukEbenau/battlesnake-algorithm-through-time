@@ -2,7 +2,7 @@ import { GameState } from "../../types";
 import { AStar } from "../path-finding";
 import { Vector2Int } from "../path-finding/datastructures/vectors";
 import { GameProvider } from "../path-finding/providers/astarProvider";
-import { StandardAStar } from "../path-finding/standard";
+import { StandardAStar } from "../path-finding/standard-astar";
 import { AgentState } from "./agent";
 
 export class GameAgentState implements AgentState {

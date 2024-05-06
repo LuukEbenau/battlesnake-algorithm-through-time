@@ -10,6 +10,8 @@
 // To get you started we've included code to prevent your Battlesnake from moving backwards.
 // For more info see docs.battlesnake.com
 
+import { AgentAction, AgentState, defineAgent } from './lib/game-ai/agent';
+import { GameAgentState } from './lib/game-ai/state';
 import runServer from './server';
 import { GameState, InfoResponse, MoveResponse } from './types';
 
@@ -52,6 +54,22 @@ function createGrid(width:number, height:number):number[][][]{
   return grid;
 }
 
+const state = new GameAgentState();
+const agent = defineAgent({});
+
+function move(gameState: GameState): MoveResponse {
+    state.updateState(gameState);
+
+    let move = agent(state);
+
+    if (move == AgentAction.Continue) {
+        move = AgentAction.Right;
+    }
+
+    return { move };
+}
+
+/*
 // move is called on every turn and returns your next move
 // Valid moves are "up", "down", "left", or "right"
 // See https://docs.battlesnake.com/api/example-move for available data
@@ -109,6 +127,7 @@ function move(gameState: GameState): MoveResponse {
   console.log(`MOVE ${gameState.turn}: ${nextMove}`)
   return { move: nextMove };
 }
+*/
 
 runServer({
   info: info,

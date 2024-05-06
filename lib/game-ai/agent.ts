@@ -1,15 +1,15 @@
-import { BehaviorTreeBuilder } from "./behavior-tree/builder";
-import { Action, Behavior } from "./behavior-tree";
-import { fail, succeed } from "./behavior-tree/tasks";
-import { AStar } from "./path-finding";
-import { Vector2Int } from "./path-finding/datastructures/vectors";
+import { BehaviorTreeBuilder } from "../behavior-tree/builder";
+import { Action, Behavior } from "../behavior-tree";
+import { fail, succeed } from "../behavior-tree/tasks";
+import { AStar } from "../path-finding";
+import { Vector2Int } from "../path-finding/datastructures/vectors";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
  */
 export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
-    getCurrentPosition(): Vector2Int;
+    get currentPosition(): Vector2Int;
     getClosestFood(): Vector2Int | undefined;
 }
 
@@ -23,11 +23,12 @@ export interface AgentConfig {
  * Actions the agent can take
  */
 export enum AgentAction {
-    Continue,
-    Up,
-    Down,
-    Left,
-    Right,
+    // TODO: change continue
+    Continue = "continue",
+    Up = "up",
+    Down = "down",
+    Left = "left",
+    Right = "right",
 }
 
 function execAgent(state: AgentState): Action<AgentAction> {
@@ -37,7 +38,7 @@ function execAgent(state: AgentState): Action<AgentAction> {
         return fail();
     }
 
-    const path = state.aStar.findPath(state.getCurrentPosition(), food);
+    const path = state.aStar.findPath(state.currentPosition, food);
 
     if (path.length < 2) {
         return fail();
@@ -57,7 +58,7 @@ function execAgent(state: AgentState): Action<AgentAction> {
     return succeed(AgentAction.Up);
 }
 
-function defineAgent(config: AgentConfig): Behavior<AgentState, AgentAction> {
+export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentAction> {
     const tree = new BehaviorTreeBuilder<AgentState, AgentAction, AgentConfig>(AgentAction.Continue);
 
     tree.setRootTree('root', execAgent);

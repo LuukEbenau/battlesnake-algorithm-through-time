@@ -40,20 +40,6 @@ function end(gameState: GameState): void {
   console.log("GAME OVER\n");
 }
 
-function createGrid(width:number, height:number):number[][][]{
-  let grid: number[][][] = new Array(width);
-
-  for (let x: number = 0; x < width; x++) {
-      grid[x] = new Array(height);
-
-      for (let y: number = 0; y < height; y++) {
-          grid[x][y] = [0];
-      }
-  }
-
-  return grid;
-}
-
 const state = new GameAgentState();
 const agent = defineAgent({});
 

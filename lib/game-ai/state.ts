@@ -6,15 +6,32 @@ import { StandardAStar } from "../path-finding/standard";
 import { AgentState } from "./agent";
 
 export class GameAgentState implements AgentState {
+    private provider: GameProvider;
     private state: GameState | undefined;
     readonly aStar: AStar<Vector2Int>;
 
     constructor() {
-        this.aStar = new StandardAStar(new GameProvider());
+        this.provider = new GameProvider();
+        this.aStar = new StandardAStar(this.provider);
     }
 
     updateState(state: GameState): void {
         this.state = state;
+        this.provider.addState(GameAgentState.createGrid(state.board.width, state.board.height));
+    }
+
+    private static createGrid(width: number, height: number): number[][][] {
+      let grid: number[][][] = new Array(width);
+
+      for (let x: number = 0; x < width; x++) {
+          grid[x] = new Array(height);
+
+          for (let y: number = 0; y < height; y++) {
+              grid[x][y] = [0];
+          }
+      }
+
+      return grid;
     }
 
     get currentPosition(): Vector2Int {

@@ -34,7 +34,7 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
             const current = openSet.dequeue();
 
             if (this.provider.equals(current, goalNode)) {
-                const path = this.reconstructPath(cameFrom, startNode, goalNode, start, goal);
+                const path = this.reconstructPath(cameFrom, startNode, current, start, goal);
                 this.provider.clear();
 
                 return path;

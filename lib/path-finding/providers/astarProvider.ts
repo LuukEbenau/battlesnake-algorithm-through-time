@@ -29,14 +29,14 @@ export class GameProvider implements AStarProvider<Vector2Int,Vector2Int>{
 	prepare(start: Vector2Int, goal: Vector2Int): void {
 		this.start = start;
 		this.goal = goal;
-		
+
 		this._isInitialized = true;
 	}
 
 	addState(grid: number[][][]){
 		this.grid = grid;
 	}
-	
+
 	clear(): void {
 		this.start = Vector2Int.DEFAULT();
 		this.goal = Vector2Int.DEFAULT();
@@ -52,7 +52,7 @@ export class GameProvider implements AStarProvider<Vector2Int,Vector2Int>{
 
 	private cellInsideBoundaries(cell:Vector2Int): boolean{
 		if(cell.x <0){
-			return false; 
+			return false;
 		}
 		if(cell.y < 0){
 			return false;

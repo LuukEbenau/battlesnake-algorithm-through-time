@@ -47,6 +47,7 @@ function move(gameState: GameState): MoveResponse {
     state.updateState(gameState);
 
     let move = agent(state);
+    console.log(`STEP: ${move}`);
 
     if (move == AgentAction.Continue) {
         move = AgentAction.Right;

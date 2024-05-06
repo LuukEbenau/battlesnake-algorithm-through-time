@@ -8,13 +8,8 @@ export class Vector2Int {
 		}
 	}
 
-	public equals(v2: Vector2Int): boolean{
-		if(this.x == v2.x && this.y == v2.y){
-			return true;
-		}
-		else{
-			return false;
-		}
+	public equals(v2: Vector2Int): boolean {
+		return this.x === v2.x && this.y === v2.y;
 	}
 	public distance(v2:Vector2Int){
 		return Math.sqrt((v2.x - this.x) ** 2 + (v2.y - this.y) ** 2);

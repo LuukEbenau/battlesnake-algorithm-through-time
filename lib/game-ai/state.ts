@@ -17,7 +17,14 @@ export class GameAgentState implements AgentState {
 
     updateState(state: GameState): void {
         this.state = state;
-        this.provider.addState(GameAgentState.createGrid(state.board.width, state.board.height));
+
+        const { head, body } = state.you;
+        const neck = body[1];
+
+        const currentDirection = new Vector2Int(head.x - neck.x, head.y - neck.y);
+
+        this.provider.addState(currentDirection,
+            GameAgentState.createGrid(state.board.width, state.board.height));
     }
 
     private static createGrid(width: number, height: number): number[][][] {

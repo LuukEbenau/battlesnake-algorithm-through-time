@@ -14,11 +14,13 @@ export interface AStarProvider<TData, TNode> {
 
     heuristic(a: TNode, b: TNode): number;
 
-    equals(a: TNode, b: TNode): boolean;
+    isGoalReached(a: TNode, b: TNode): boolean;
 
     getNeighbors(node: TNode): IterableIterator<TNode>;
 
-    inMap(data: TData): TNode;
+    inMapStart(start: TData, goal: TData): TNode;
+
+    inMapGoal(start: TData, goal: TData): TNode;
 
     outMap(data: TNode, start: TData, goal: TData): TData;
 

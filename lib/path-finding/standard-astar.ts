@@ -9,10 +9,10 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
     findPath(start: TData, goal: TData): TData[] {
         this.provider.prepare(start, goal);
 
-        const startNode = this.provider.inMap(start);
-        const goalNode = this.provider.inMap(goal);
+        const startNode = this.provider.inMapStart(start, goal);
+        const goalNode = this.provider.inMapGoal(start, goal);
 
-        if (this.provider.equals(startNode, goalNode)) {
+        if (this.provider.isGoalReached(startNode, goalNode)) {
             return [
                 this.provider.outMapStart(startNode, start, goal),
                 this.provider.outMapGoal(goalNode, start, goal),
@@ -25,7 +25,6 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
         gScore.set(startNode, 0);
 
         const openSet = new PriorityQueue<TNode>();
-        const closedSet = new Set<TNode>();
 
         const startFScore = this.provider.heuristic(startNode, goalNode);
         openSet.enqueue(startNode, startFScore);
@@ -33,18 +32,13 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
         while (!openSet.isEmpty()) {
             const current = openSet.dequeue();
 
-            if (this.provider.equals(current, goalNode)) {
+            if (this.provider.isGoalReached(current, goalNode)) {
                 const path = this.reconstructPath(cameFrom, startNode, current, start, goal);
                 this.provider.clear();
+                console.log(path);
 
                 return path;
             }
-
-            if (closedSet.has(current)) {
-                continue;
-            }
-
-            closedSet.add(current);
 
             const currentGScore = gScore.get(current);
 

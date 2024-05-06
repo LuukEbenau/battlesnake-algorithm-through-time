@@ -1,4 +1,4 @@
-export type Behavior<TState, TAction> = (state: TState) => TAction | undefined;
+export type Behavior<TState, TAction> = (state: TState) => TAction;
 
 export type Task<TState, TAction, TConfig> = (state: TState, config: TConfig, behaviorTree: BehaviorTree<TState, TAction, TConfig>) => Action<TAction>;
 
@@ -16,7 +16,7 @@ export class Action<TAction> {
 export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTree<TState, TAction, TConfig> {
     private readonly trees = new Map<string, Task<TState, TAction, TConfig>>();
 
-    constructor() {
+    constructor(private readonly noopAction: TAction) {
         // TODO
     }
 
@@ -44,11 +44,11 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     }
 
     toBehavior(config: TConfig): Behavior<TState, TAction> {
-        return state => this.getRootTree()(state, config, this).action;
+        return state => this.getRootTree()(state, config, this).action ?? this.noopAction;
     }
 }
 
-export function succeed<TState, TAction>(action?: TAction): Action<TAction> {
+export function succeed<TAction>(action?: TAction): Action<TAction> {
     return new Action(true, action);
 }
 

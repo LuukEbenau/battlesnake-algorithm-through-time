@@ -1,0 +1,23 @@
+export interface AStar<T> {
+    findPath(start: T, goal: T): T[];
+}
+
+export interface AStarProvider<TData, TNode> {
+    prepare(start: TData, goal: TData): void;
+
+    clear(): void;
+
+    distance(a: TNode, b: TNode): number;
+
+    heuristic(a: TNode, b: TNode): number;
+
+    getNeighbors(node: TNode): IterableIterator<TNode>;
+
+    inMap(data: TData): TNode;
+
+    outMap(data: TNode, start: TData, goal: TData): TData;
+
+    outMapStart(node: TNode, start: TData, goal: TData): TData;
+
+    outMapGoal(node: TNode, start: TData, goal: TData): TData;
+}

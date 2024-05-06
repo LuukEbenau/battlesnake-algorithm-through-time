@@ -38,6 +38,20 @@ function end(gameState: GameState): void {
   console.log("GAME OVER\n");
 }
 
+function createGrid(width:number, height:number):number[][][]{
+  let grid: number[][][] = new Array(width);
+
+  for (let x: number = 0; x < width; x++) {
+      grid[x] = new Array(height);
+
+      for (let y: number = 0; y < height; y++) {
+          grid[x][y] = [0];
+      }
+  }
+
+  return grid;
+}
+
 // move is called on every turn and returns your next move
 // Valid moves are "up", "down", "left", or "right"
 // See https://docs.battlesnake.com/api/example-move for available data
@@ -66,6 +80,8 @@ function move(gameState: GameState): MoveResponse {
   } else if (myNeck.y > myHead.y) { // Neck is above head, don't move up
     isMoveSafe.up = false;
   }
+
+  let grid = createGrid(gameState.board.width,gameState.board.height)
 
   // TODO: Step 1 - Prevent your Battlesnake from moving out of bounds
   // boardWidth = gameState.board.width;

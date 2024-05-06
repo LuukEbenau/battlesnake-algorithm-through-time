@@ -3,9 +3,10 @@ import { succeed } from "./tasks";
 
 export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTree<TState, TAction, TConfig> {
     private readonly trees = new Map<string, Task<TState, TAction, TConfig>>();
+    private rootName = '';
 
     constructor(private readonly noopAction: TAction) {
-        this.setRootTree(succeed);
+        this.setRootTree('root', succeed);
     }
 
     setTree(name: string, tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {
@@ -24,11 +25,12 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     }
 
     getRootTree(): Task<TState, TAction, TConfig> {
-        return this.getTree("root");
+        return this.getTree(this.rootName);
     }
 
-    setRootTree(tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {
-        return this.setTree("root", tree);
+    setRootTree(name: string, tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {
+        this.rootName = name;
+        return this.setTree(name, tree);
     }
 
     toBehavior(config: TConfig): Behavior<TState, TAction> {

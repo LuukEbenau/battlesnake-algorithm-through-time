@@ -77,8 +77,8 @@ export class GameProvider implements AStarProvider<Vector2Int, Node> {
 
 		for (const directionVector of this.directionVectors) {
 			const cell = node.position.add(directionVector);
-
-			if (this.cellInsideBoundaries(cell) && !oppositeDirection.equals(directionVector)) {
+			
+			if (this.cellInsideBoundaries(cell) && this.grid[cell.x][cell.y][0] === 0 && !oppositeDirection.equals(directionVector)) {
 				yield new Node(cell, directionVector);
 			}
 		}

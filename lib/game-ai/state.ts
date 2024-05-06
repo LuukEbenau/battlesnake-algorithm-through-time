@@ -24,11 +24,12 @@ export class GameAgentState implements AgentState {
         const currentDirection = new Vector2Int(head.x - neck.x, head.y - neck.y);
 
         this.provider.addState(currentDirection,
-            GameAgentState.createGrid(state.board.width, state.board.height));
+            GameAgentState.createGrid(state.board.width, state.board.height,state));
     }
 
-    private static createGrid(width: number, height: number): number[][][] {
+    private static createGrid(width: number, height: number, state: GameState): number[][][] {
       let grid: number[][][] = new Array(width);
+      
 
       for (let x: number = 0; x < width; x++) {
           grid[x] = new Array(height);
@@ -36,6 +37,12 @@ export class GameAgentState implements AgentState {
           for (let y: number = 0; y < height; y++) {
               grid[x][y] = [0];
           }
+      }
+      
+      for (const snake of state.board.snakes) {
+        for (const coord of snake.body) {
+            grid[coord.x][coord.y][0] = 1;
+        }
       }
 
       return grid;

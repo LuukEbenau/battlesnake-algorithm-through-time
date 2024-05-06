@@ -44,7 +44,15 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     }
 
     toBehavior(config: TConfig): Behavior<TState, TAction> {
-        return state => this.getRootTree()(state, config, this).action ?? this.noopAction;
+        return state => {
+            const action = this.getRootTree()(state, config, this);
+
+            if (!action.status || action.action === undefined) {
+                return this.noopAction;
+            }
+
+            return action.action;
+        }
     }
 }
 

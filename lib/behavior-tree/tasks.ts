@@ -1,7 +1,5 @@
 import { Action, Task } from ".";
 
-export function succeed<TAction>(): Action<TAction>;
-export function succeed<TAction>(action?: TAction): Action<TAction>;
 export function succeed<TAction>(action?: TAction): Action<TAction> {
     return new Action(true, action);
 }

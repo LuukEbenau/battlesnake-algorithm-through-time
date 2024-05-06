@@ -6,7 +6,7 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     private rootName = '';
 
     constructor(private readonly noopAction: TAction) {
-        this.setRootTree('root', succeed);
+        this.setRootTree('root', () => succeed());
     }
 
     setTree(name: string, tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {

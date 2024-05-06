@@ -26,12 +26,17 @@ export class GameProvider implements AStarProvider<Vector2Int,Vector2Int>{
 	equals(a: Vector2Int, b: Vector2Int): boolean {
 		return a.equals(b);
 	}
-	prepare(start: Vector2Int, goal: Vector2Int, grid: number[][][]): void {
+	prepare(start: Vector2Int, goal: Vector2Int): void {
 		this.start = start;
 		this.goal = goal;
-		this.grid = grid;
+		
 		this._isInitialized = true;
 	}
+
+	addState(grid: number[][][]){
+		this.grid = grid;
+	}
+	
 	clear(): void {
 		this.start = Vector2Int.DEFAULT();
 		this.goal = Vector2Int.DEFAULT();

@@ -17,7 +17,7 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     private readonly trees = new Map<string, Task<TState, TAction, TConfig>>();
 
     constructor(private readonly noopAction: TAction) {
-        // TODO
+        this.setRootTree(succeed);
     }
 
     setTree(name: string, tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {
@@ -56,6 +56,8 @@ export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTr
     }
 }
 
+export function succeed<TAction>(): Action<TAction>;
+export function succeed<TAction>(action?: TAction): Action<TAction>;
 export function succeed<TAction>(action?: TAction): Action<TAction> {
     return new Action(true, action);
 }

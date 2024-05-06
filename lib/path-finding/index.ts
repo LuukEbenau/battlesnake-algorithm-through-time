@@ -3,7 +3,10 @@ export interface AStar<T> {
 }
 
 export interface AStarProvider<TData, TNode> {
-    prepare(start: TData, goal: TData): void;
+    // format is [x][y][t] => t is currently always 0, until implemented
+    prepare(start: TData, goal: TData, grid:number[][][]): void;
+
+    get isInitialized():boolean;
 
     clear(): void;
 

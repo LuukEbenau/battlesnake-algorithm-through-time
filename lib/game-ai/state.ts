@@ -10,6 +10,7 @@ export class GameAgentState implements AgentState {
 
     readonly aStar: AStar<Vector2Int>;
     state: GameState | undefined;
+    grid: number[][][] = [];
 
     private readonly snakeBodyPenalty = 40;
 
@@ -28,8 +29,9 @@ export class GameAgentState implements AgentState {
 
     updateState(state: GameState): void {
         this.state = state;
+        this.grid = this.createGrid(state.board.width, state.board.height, state);
 
-        this.provider.updateState(this.createGrid(state.board.width, state.board.height,state));
+        this.provider.updateState(this.grid);
     }
 
     private createGrid(width: number, height: number, state: GameState): number[][][] {
@@ -55,5 +57,9 @@ export class GameAgentState implements AgentState {
 
     get currentPosition(): Vector2Int {
         return Vector2Int.fromCoord(this.gameState.you.head);
+    }
+
+    isCellOccupied(cell: Vector2Int): boolean {
+        return false;
     }
 }

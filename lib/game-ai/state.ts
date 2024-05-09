@@ -39,7 +39,11 @@ export class GameAgentState implements AgentState {
         return Vector2Int.fromCoord(this.gameState.you.head);
     }
 
-    isCellOccupied(cell: Vector2Int): boolean {
-        return false;
+    isCellInGrid(cell: Vector2Int): boolean {
+        return this.grid[0]?.[cell.x]?.[cell.y] !== undefined;
+    }
+
+    isCellFree(cell: Vector2Int): boolean {
+        return this.grid[0][cell.x][cell.y] <= 1;
     }
 }

@@ -1,6 +1,7 @@
 import { Coord } from "../../types";
 
 export class Vector2Int {
+    // TODO: type safety?
     public static fromCoord(coord: Coord): Vector2Int;
     public static fromCoord(coord: Coord | undefined): Vector2Int | undefined;
     public static fromCoord(coord: Coord | undefined): Vector2Int | undefined {

@@ -24,7 +24,6 @@ export interface AgentConfig {
  * Actions the agent can take
  */
 export enum AgentAction {
-    // TODO: change continue
     Continue = "continue",
     Up = "up",
     Down = "down",

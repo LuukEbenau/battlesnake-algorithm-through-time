@@ -55,26 +55,11 @@ function directionToAction(direction: Vector2Int): AgentAction {
 
 }
 
-function getClosestFood(state: AgentState): Vector2Int | undefined {
-    const position = state.currentPosition;
-
-    return Vector2Int.fromCoord(
-        state.gameState.board
-            .food
-            .map(f => new Vector2Int(f.x, f.y))
-            .map(f => ({ position: f, distance: position.distance(f) }))
-            .sort((a, b) => a.distance - b.distance)[0]
-            ?.position
-    );
-}
-
 function blockEnemy(): Action<AgentAction> {
     return fail();
 }
 
-function eatFood(state: AgentState): Action<AgentAction> {
-    const food = getClosestFood(state);
-
+function eatSelectedFood(state: AgentState, food: Vector2Int): Action<AgentAction> {
     if (food === undefined) {
         return fail();
     }
@@ -97,6 +82,25 @@ function eatFood(state: AgentState): Action<AgentAction> {
         return succeed(AgentAction.Down);
     }
     return succeed(AgentAction.Up);
+}
+
+function eatFood(state: AgentState): Action<AgentAction> {
+    const position = state.currentPosition;
+    const sortedFoods = state.gameState.board.food
+        .map(f => new Vector2Int(f.x, f.y))
+        .map(f => ({ position: f, distance: position.distance(f) }))
+        .sort((a, b) => a.distance - b.distance)
+        .map(f => Vector2Int.fromCoord(f.position));
+
+    for (const food of sortedFoods) {
+        const action = eatSelectedFood(state, food);
+
+        if (action.status) {
+            return action;
+        }
+    }
+
+    return fail();
 }
 
 function stayAlive(state: AgentState): Action<AgentAction> {

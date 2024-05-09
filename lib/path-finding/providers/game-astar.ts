@@ -10,9 +10,7 @@ export class GameAStarProvider extends GridAStarProvider {
 	}
 
     private getCoefficient(node: GridAStarNode):number{
-        let coefficient = this.grid[node.position.z][node.position.x][node.position.y];
-        console.log("Coefficient is" + coefficient);
-        return coefficient;
+        return this.grid[node.position.z][node.position.x][node.position.y];
     }
 
     override distance(a: GridAStarNode, b: GridAStarNode): number {

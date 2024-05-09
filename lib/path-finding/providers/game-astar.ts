@@ -28,25 +28,35 @@ export class GameAStarProvider extends GridAStarProvider {
         return prevPath
     }
 
-    private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
-        let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
-
+    private _getAvoidPreviousPathCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode){
         // For now, check if node is part of path. If this is true, don't consider it
         let prevNodes = this.getPrevCellsInPath(curNode);
         let currentPathLength = prevNodes.length;
         let snakeLength = this.obstacleMap.state?.you.body.length;
 
         // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
-        let numToSkip =  currentPathLength - (snakeLength as number);
+        let numToSkip = currentPathLength - (snakeLength as number);
         if(numToSkip <0) numToSkip = 0;
         let cellsToCheck = currentPathLength - numToSkip;
         if(cellsToCheck>0){
             let partOfPrevNodes = prevNodes.slice(0,cellsToCheck).some(prevNode => nextNode.position.equals(prevNode.position));
 
             if(partOfPrevNodes){
-                coefficient = 20000;
+                return 20000;
             }
         }
+
+        return 0;
+    }
+
+    private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
+        let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
+
+        let nextNodeCoefficient = this._getAvoidPreviousPathCoefficient(curNode,nextNode)
+        if(nextNodeCoefficient>0){
+            coefficient = nextNodeCoefficient;
+        }
+
         return coefficient;
     }
 

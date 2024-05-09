@@ -7,6 +7,9 @@ export class ObstacleGrid{
     public constructor(public readonly width:number, public readonly height:number, public readonly state:GameState){
         this.grid = this.createGrid(width,height, state.board.snakes);
     }
+
+    // public createInitialGrid(){}
+
     /**
      *
      * @param width Width of the grid

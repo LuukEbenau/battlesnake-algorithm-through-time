@@ -11,7 +11,7 @@ export class GameAgentState implements AgentState {
     private readonly provider: GameAStarProvider;
     readonly aStar: AStar<Vector2Int>;
 
-    private grid!: ObstacleGrid;
+    private obstacleMap!: ObstacleGrid;
     state: GameState | undefined;
 
 
@@ -30,9 +30,9 @@ export class GameAgentState implements AgentState {
 
     updateState(state: GameState): void {
         this.state = state;
-        this.grid = new ObstacleGrid(state.board.width,state.board.height, state);
+        this.obstacleMap = new ObstacleGrid(state.board.width,state.board.height, state);
 
-        this.provider.updateState(this.grid);
+        this.provider.updateState(this.obstacleMap);
     }
 
     get currentPosition(): Vector2Int {
@@ -40,10 +40,10 @@ export class GameAgentState implements AgentState {
     }
 
     isCellInGrid(cell: Vector2Int): boolean {
-        return this.grid[0]?.[cell.x]?.[cell.y] !== undefined;
+        return this.obstacleMap.grid[0][cell.x]?.[cell.y] !== undefined;
     }
 
     isCellFree(cell: Vector2Int): boolean {
-        return this.grid[0][cell.x][cell.y] <= 1;
+        return this.obstacleMap.grid[0][cell.x][cell.y] <= 1;
     }
 }

@@ -2,7 +2,7 @@ import { BehaviorTreeBuilder } from "../behavior-tree/builder";
 import { Action, Behavior } from "../behavior-tree";
 import { fail, succeed } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
-import { Vector2Int } from "../path-finding/datastructures/vectors";
+import { Vector2Int } from "../util/vectors";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree

@@ -1,11 +1,11 @@
 import { AStarProvider } from "..";
-import { Vector2Int } from "../datastructures/vectors";
+import { Vector2Int } from "../../util/vectors";
 
-export class Node {
+export class GameAStarNode {
     constructor(public readonly position: Vector2Int, public readonly direction: Vector2Int) {}
 }
 
-export class GameProvider implements AStarProvider<Vector2Int, Node> {
+export class GameAStarProvider implements AStarProvider<Vector2Int, GameAStarNode> {
 	private start:Vector2Int;
 	private goal:Vector2Int;
     private currentDirection;
@@ -28,7 +28,7 @@ export class GameProvider implements AStarProvider<Vector2Int, Node> {
 
 		this.directionVectors = [new Vector2Int(-1,0), new Vector2Int(1,0), new Vector2Int(0,1), new Vector2Int(0,-1)];
 	}
-    isGoalReached(a: Node, b: Node): boolean {
+    isGoalReached(a: GameAStarNode, b: GameAStarNode): boolean {
         return a.position.equals(b.position);
     }
 	prepare(start: Vector2Int, goal: Vector2Int): void {
@@ -49,10 +49,10 @@ export class GameProvider implements AStarProvider<Vector2Int, Node> {
 		this.grid = [];
 		this._isInitialized = false;
 	}
-	distance(a: Node, b: Node): number {
+	distance(a: GameAStarNode, b: GameAStarNode): number {
 		return a.position.distance(b.position);
 	}
-	heuristic(a: Node, b: Node): number {
+	heuristic(a: GameAStarNode, b: GameAStarNode): number {
 		return this.distance(a,b);
 	}
 
@@ -72,30 +72,30 @@ export class GameProvider implements AStarProvider<Vector2Int, Node> {
 		return true;
 	}
 
-	*getNeighbors(node: Node): IterableIterator<Node> {
+	*getNeighbors(node: GameAStarNode): IterableIterator<GameAStarNode> {
         const oppositeDirection = new Vector2Int(-node.direction.x, -node.direction.y);
 
 		for (const directionVector of this.directionVectors) {
 			const cell = node.position.add(directionVector);
-			
+
 			if (this.cellInsideBoundaries(cell) && this.grid[cell.x][cell.y][0] === 0 && !oppositeDirection.equals(directionVector)) {
-				yield new Node(cell, directionVector);
+				yield new GameAStarNode(cell, directionVector);
 			}
 		}
 	}
-	inMapStart(start: Vector2Int, goal: Vector2Int): Node {
-		return new Node(start, this.currentDirection);
+	inMapStart(start: Vector2Int, goal: Vector2Int): GameAStarNode {
+		return new GameAStarNode(start, this.currentDirection);
 	}
-    inMapGoal(start: Vector2Int, goal: Vector2Int): Node {
-        return new Node(goal, Vector2Int.DEFAULT());
+    inMapGoal(start: Vector2Int, goal: Vector2Int): GameAStarNode {
+        return new GameAStarNode(goal, Vector2Int.DEFAULT());
     }
-	outMap(data: Node): Vector2Int {
+	outMap(data: GameAStarNode): Vector2Int {
 		return data.position;
 	}
-	outMapStart(node: Node, start: Vector2Int, goal: Vector2Int): Vector2Int {
+	outMapStart(node: GameAStarNode, start: Vector2Int, goal: Vector2Int): Vector2Int {
 		return start;
 	}
-	outMapGoal(node: Node, start: Vector2Int, goal: Vector2Int): Vector2Int {
+	outMapGoal(node: GameAStarNode, start: Vector2Int, goal: Vector2Int): Vector2Int {
 		return goal;
 	}
 }

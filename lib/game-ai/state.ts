@@ -41,7 +41,8 @@ export class GameAgentState implements AgentState {
       
       for (const snake of state.board.snakes) {
         for (const coord of snake.body) {
-            grid[coord.x][coord.y][0] = 1;
+            grid[coord.x][coord.y][0] = 1; //TODO: instead of putting it to 0, we can put it basically on the snake.body.length - (current index in body), and then at each time step just do -1 for all indexes this might be a more scalable method? however, might also bring some drawbacks, since its not 3d astar anymore
+            
         }
       }
 

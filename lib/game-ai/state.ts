@@ -34,7 +34,7 @@ export class GameAgentState implements AgentState {
     private createGrid(width: number, height: number, state: GameState): number[][][] {
 			//head: body[0], neck[1], etc
 
-      let maxTimesteps: number = 30;// state.you.body.length;
+      let maxTimesteps: number = 100;// state.you.body.length;
       let grid: number[][][] = new Array(maxTimesteps);
 
 

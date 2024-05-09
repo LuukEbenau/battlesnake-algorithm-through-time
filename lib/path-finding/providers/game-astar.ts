@@ -48,13 +48,8 @@ export class GameAStarProvider extends GridAStarProvider {
     // }
 
     private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
-        let timestepsInGrid = this.obstacleMap.grid[0].length;
-        if(timestepsInGrid && nextNode.position.z > timestepsInGrid){
-            // we need to get information for a new timestep. for now, we just add a copy of last timestep?
-            //TODO: add layer
-            this.obstacleMap.grid.push(this.obstacleMap.grid[timestepsInGrid-1])
-        }
-        let coefficient = this.obstacleMap.grid[nextNode.position.z][nextNode.position.x][nextNode.position.y];
+        // let timestepsInGrid = this.obstacleMap.getGridAtTime(0).length;
+        let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
         return coefficient;
     }
 
@@ -69,10 +64,10 @@ export class GameAStarProvider extends GridAStarProvider {
 		if(cell.y < 0){
 			return false;
 		}
-		if(cell.x >= this.obstacleMap?.grid[0]?.length){
+		if(cell.x >= this.obstacleMap.getGridAtTime(0)?.length){
 			return false;
 		}
-		if(cell.y >= this.obstacleMap?.grid[0][0]?.length){
+		if(cell.y >= this.obstacleMap?.getGridAtTime(0)[0]?.length){
 			return false;
 		}
 		return true;

@@ -41,10 +41,10 @@ export class GameAgentState implements AgentState {
     }
 
     isCellInGrid(cell: Vector2Int): boolean {
-        return this.obstacleMap.grid[0][cell.x]?.[cell.y] !== undefined;
+        return this.obstacleMap.getGridAtTime(0)[cell.x]?.[cell.y] !== undefined;
     }
 
     isCellFree(cell: Vector2Int): boolean {
-        return this.obstacleMap.grid[0][cell.x][cell.y] <= 1;
+        return this.obstacleMap.getGridAtTime(0)[cell.x][cell.y] <= 1;
     }
 }

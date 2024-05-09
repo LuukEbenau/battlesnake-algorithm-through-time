@@ -6,7 +6,19 @@ export class ObstacleGrid{
     public height:number;
     public state:GameState | undefined;
 
-    public grid: number[][][];
+    private grid: number[][][];
+    public getGridAtTime(t:number):number[][]{
+        let currentGridSize = this.grid.length;
+        if(t>=currentGridSize){
+            // add extra layers, in case it doesnt exist yet
+            for(let i = currentGridSize; i <= t; i++){
+                this.grid[i] = this.createGridLayer(i,this.width, this.height, this.state?.board.snakes as Battlesnake[])
+            }
+        }
+
+        return this.grid[t];
+    }
+
     public constructor(){
         this.width = 0
         this.height = 0
@@ -18,7 +30,7 @@ export class ObstacleGrid{
         this.width = width;
         this.height = height;
         this.state = state;
-        this.grid = this.createGrid(width,height, state.board.snakes);
+        this.grid = [];//this.createGrid(width,height, state.board.snakes);
     }
 
     /**
@@ -28,20 +40,21 @@ export class ObstacleGrid{
      * @param state current gamestate
      * @returns a grid, containing a obstacle map with heuristic coefficients for each grid cell at a given time. output format is T*X*Y
      */
-    private createGrid(width: number, height: number, snakes: Battlesnake[]): number[][][] {
-        let maxTimesteps: number = 100;// state.you.body.length;
-        let grid: number[][][] = new Array(maxTimesteps);
+    // private createGrid(width: number, height: number, snakes: Battlesnake[]): number[][][] {
+    //     let maxTimesteps: number = 100;// state.you.body.length;
+    //     let grid: number[][][] = new Array(maxTimesteps);
 
-        for (let t:number = 0; t< maxTimesteps; t++){
-            grid[t] = this.createGridLayer(0, t,width,height, snakes);
-        }
+    //     for (let t:number = 0; t< maxTimesteps; t++){
+    //         grid[t] = this.createGridLayer(t,width,height, snakes);
+    //     }
 
-        return grid;
-    }
+    //     return grid;
+    // }
 
-    private createGridLayer(currentTime: number, t:number, width:number, height: number, snakes:Battlesnake[] ){
+
+    private createGridLayer(t:number, width:number, height: number, snakes:Battlesnake[] ){
         let gridLayer = new Array(width);
-
+        let currentTime : number = 0; // might implement this later if we need it. its basically at which time step we observed the snakes.
         for (let x: number = 0; x < width; x++) {
           gridLayer[x] = new Array(height);
 
@@ -69,7 +82,7 @@ export class ObstacleGrid{
         let snakeLengthToConsider = snake.body.length - timeDiff;
 
         if(snakeLengthToConsider > 0){
-          for(let bodyPartI:number = 0; bodyPartI < snakeLengthToConsider; bodyPartI++){
+          for(let bodyPartI: number = 0; bodyPartI < snakeLengthToConsider; bodyPartI++){
             let bodyPart = snake.body[bodyPartI];
             grid[bodyPart.x][bodyPart.y] = this.snakeBodyPenalty;
           }

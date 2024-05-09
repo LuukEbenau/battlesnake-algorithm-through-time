@@ -1,12 +1,12 @@
 import { AbstractAStarProvider } from "..";
-import { Vector2Int } from "../../util/vectors";
+import { Vector3Int, Vector2Int } from "../../util/vectors";
 
 export class GridAStarNode {
-    constructor(public readonly position: Vector2Int, public readonly direction: Vector2Int) {}
+    constructor(public readonly position: Vector3Int, public readonly direction: Vector3Int) {}
 }
 
 export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridAStarNode, string> {
-	protected readonly directionVectors = [new Vector2Int(-1,0), new Vector2Int(1,0), new Vector2Int(0,1), new Vector2Int(0,-1)];
+	protected readonly directionVectors = [new Vector3Int(-1,0,1), new Vector3Int(1,0,1), new Vector3Int(0,1,1), new Vector3Int(0,-1,1)];
 
     override isGoal(goalNode: GridAStarNode, node: GridAStarNode): boolean {
         return goalNode.position.equals(node.position);
@@ -29,12 +29,14 @@ export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridASt
 		}
 	}
 	override inMapStart(start: Vector2Int, goal: Vector2Int): GridAStarNode {
-		return new GridAStarNode(start, new Vector2Int(0, 0));
+        let startPos3d = new Vector3Int(start.x,start.y,0);
+		return new GridAStarNode(startPos3d, Vector3Int.zero());
 	}
     override inMapGoal(start: Vector2Int, goal: Vector2Int): GridAStarNode {
-        return new GridAStarNode(goal, Vector2Int.zero());
+        let goalPos3d = new Vector3Int(goal.x,goal.y,0);
+        return new GridAStarNode(goalPos3d, Vector3Int.zero());
     }
 	override outMap(data: GridAStarNode): Vector2Int {
-		return data.position;
+		return new Vector2Int(data.position.x, data.position.y);
 	}
 }

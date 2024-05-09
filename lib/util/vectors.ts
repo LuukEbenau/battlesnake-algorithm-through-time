@@ -45,6 +45,7 @@ export class Vector3Int extends Vector2Int{
 	}
 
 	public equals(v2: Vector3Int): boolean {
+        //TODO: whould we also do equality check the z axis? this might give side effects so be careful
 		return this.x === v2.x && this.y === v2.y;
 	}
 	public distance(v2:Vector3Int){

@@ -87,6 +87,6 @@ export class GameAgentState implements AgentState {
     }
 
     isCellOccupied(cell: Vector2Int): boolean {
-        return false;
+        return this.grid[0][cell.x][cell.y] <= 1;
     }
 }

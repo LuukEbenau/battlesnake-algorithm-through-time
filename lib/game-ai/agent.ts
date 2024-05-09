@@ -12,6 +12,7 @@ export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
     get gameState(): GameState;
     get currentPosition(): Vector2Int;
+    isCellOccupied(cell: Vector2Int): boolean;
 }
 
 /**

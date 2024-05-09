@@ -14,7 +14,7 @@ export class Vector2Int {
 	public distance(v2:Vector2Int){
 		return Math.sqrt((v2.x - this.x) ** 2 + (v2.y - this.y) ** 2);
 	}
-	public static DEFAULT(): Vector2Int{
+	public static zero(): Vector2Int {
 		return new Vector2Int(0,0);
 	}
 

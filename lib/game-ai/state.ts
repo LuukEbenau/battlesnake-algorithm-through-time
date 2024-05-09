@@ -18,13 +18,7 @@ export class GameAgentState implements AgentState {
     updateState(state: GameState): void {
         this.state = state;
 
-        const { head, body } = state.you;
-        const neck = body[1];
-
-        const currentDirection = new Vector2Int(head.x - neck.x, head.y - neck.y);
-
-        this.provider.addState(currentDirection,
-            GameAgentState.createGrid(state.board.width, state.board.height,state));
+        this.provider.updateState(GameAgentState.createGrid(state.board.width, state.board.height,state));
     }
 
     private static createGrid(width: number, height: number, state: GameState): number[][][] {
@@ -42,7 +36,7 @@ export class GameAgentState implements AgentState {
       for (const snake of state.board.snakes) {
         for (const coord of snake.body) {
             grid[coord.x][coord.y][0] = 1; //TODO: instead of putting it to 0, we can put it basically on the snake.body.length - (current index in body), and then at each time step just do -1 for all indexes this might be a more scalable method? however, might also bring some drawbacks, since its not 3d astar anymore
-            
+
         }
       }
 

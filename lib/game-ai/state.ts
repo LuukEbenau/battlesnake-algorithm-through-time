@@ -1,17 +1,17 @@
 import { GameState } from "../../types";
 import { AStar } from "../path-finding";
-import { Vector2Int } from "../path-finding/datastructures/vectors";
-import { GameProvider } from "../path-finding/providers/astarProvider";
+import { GameAStarProvider } from "../path-finding/providers/game-astar";
 import { StandardAStar } from "../path-finding/standard-astar";
+import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 
 export class GameAgentState implements AgentState {
-    private provider: GameProvider;
+    private provider: GameAStarProvider;
     private state: GameState | undefined;
     readonly aStar: AStar<Vector2Int>;
 
     constructor() {
-        this.provider = new GameProvider();
+        this.provider = new GameAStarProvider();
         this.aStar = new StandardAStar(this.provider);
     }
 
@@ -29,7 +29,7 @@ export class GameAgentState implements AgentState {
 
     private static createGrid(width: number, height: number, state: GameState): number[][][] {
       let grid: number[][][] = new Array(width);
-      
+
 
       for (let x: number = 0; x < width; x++) {
           grid[x] = new Array(height);
@@ -38,7 +38,7 @@ export class GameAgentState implements AgentState {
               grid[x][y] = [0];
           }
       }
-      
+
       for (const snake of state.board.snakes) {
         for (const coord of snake.body) {
             grid[coord.x][coord.y][0] = 1; //TODO: instead of putting it to 0, we can put it basically on the snake.body.length - (current index in body), and then at each time step just do -1 for all indexes this might be a more scalable method? however, might also bring some drawbacks, since its not 3d astar anymore

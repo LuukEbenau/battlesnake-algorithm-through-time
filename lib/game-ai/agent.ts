@@ -4,6 +4,7 @@ import { fail, fallback, succeed } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
+import { iterateDirections } from "../util/grid";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
@@ -12,7 +13,8 @@ export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
     get gameState(): GameState;
     get currentPosition(): Vector2Int;
-    isCellOccupied(cell: Vector2Int): boolean;
+    isCellFree(cell: Vector2Int): boolean;
+    isCellInGrid(cell: Vector2Int): boolean;
 }
 
 /**
@@ -30,6 +32,27 @@ export enum AgentAction {
     Down = "down",
     Left = "left",
     Right = "right",
+}
+
+function directionToAction(direction: Vector2Int): AgentAction {
+    if (direction.y == 0) {
+        if (direction.x < 0) {
+            return AgentAction.Left;
+        }
+        if (direction.x > 0) {
+            return AgentAction.Right;
+        }
+    }
+    else if (direction.x == 0) {
+        if (direction.y < 0) {
+            return AgentAction.Down;
+        }
+        if (direction.y > 0) {
+            return AgentAction.Up;
+        }
+    }
+    return AgentAction.Continue;
+
 }
 
 function getClosestFood(state: AgentState): Vector2Int | undefined {
@@ -76,7 +99,17 @@ function eatFood(state: AgentState): Action<AgentAction> {
     return succeed(AgentAction.Up);
 }
 
-function avoidDeath(state: AgentState): Action<AgentAction> {
+function stayAlive(state: AgentState): Action<AgentAction> {
+    const position = state.currentPosition;
+
+    for (const direction of iterateDirections()) {
+        const cell = position.add(direction);
+
+        if (state.isCellInGrid(cell) && state.isCellFree(cell)) {
+            return succeed(directionToAction(direction));
+        }
+    }
+
     return fail();
 }
 
@@ -88,7 +121,7 @@ export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentActi
         fallback(
             blockEnemy,
             eatFood,
-            avoidDeath,
+            stayAlive,
         )
     );
 

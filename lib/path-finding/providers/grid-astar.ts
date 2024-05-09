@@ -1,4 +1,5 @@
 import { AbstractAStarProvider } from "..";
+import { getDirections } from "../../util/grid";
 import { Vector3Int, Vector2Int } from "../../util/vectors";
 
 export class GridAStarNode {
@@ -6,7 +7,7 @@ export class GridAStarNode {
 }
 
 export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridAStarNode, string> {
-	protected readonly directionVectors = [new Vector3Int(-1,0,1), new Vector3Int(1,0,1), new Vector3Int(0,1,1), new Vector3Int(0,-1,1)];
+	private readonly directionVectors = getDirections().map(v => new Vector3Int(v.x, v.y, 1));
 
     override isGoal(goalNode: GridAStarNode, node: GridAStarNode): boolean {
         return goalNode.position.equals(node.position);

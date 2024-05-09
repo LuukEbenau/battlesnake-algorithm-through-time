@@ -1,30 +1,25 @@
 import { GameState } from "../../types";
 import { AStar } from "../path-finding";
 import { GameAStarProvider } from "../path-finding/providers/game-astar";
+import { PredictiveAStarProvider } from "../path-finding/providers/predictive-astar";
 import { StandardAStar } from "../path-finding/standard-astar";
 import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 
 export class GameAgentState implements AgentState {
-    private provider: GameAStarProvider;
+    private provider: PredictiveAStarProvider;
     private state: GameState | undefined;
     readonly aStar: AStar<Vector2Int>;
 
     constructor() {
-        this.provider = new GameAStarProvider();
+        this.provider = new PredictiveAStarProvider();
         this.aStar = new StandardAStar(this.provider);
     }
 
     updateState(state: GameState): void {
         this.state = state;
 
-        const { head, body } = state.you;
-        const neck = body[1];
-
-        const currentDirection = new Vector2Int(head.x - neck.x, head.y - neck.y);
-
-        this.provider.addState(currentDirection,
-            GameAgentState.createGrid(state.board.width, state.board.height,state));
+        this.provider.updateState(GameAgentState.createGrid(state.board.width, state.board.height,state));
     }
 
     private static createGrid(width: number, height: number, state: GameState): number[][][] {

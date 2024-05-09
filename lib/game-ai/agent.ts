@@ -1,6 +1,6 @@
 import { BehaviorTreeBuilder } from "../behavior-tree/builder";
 import { Action, Behavior } from "../behavior-tree";
-import { fail, succeed } from "../behavior-tree/tasks";
+import { fail, fallback, succeed } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
 
@@ -31,7 +31,11 @@ export enum AgentAction {
     Right = "right",
 }
 
-function execAgent(state: AgentState): Action<AgentAction> {
+function blockEnemy(): Action<AgentAction> {
+    return fail();
+}
+
+function eatFood(state: AgentState): Action<AgentAction> {
     const food = state.getClosestFood();
 
     if (food === undefined) {
@@ -58,10 +62,21 @@ function execAgent(state: AgentState): Action<AgentAction> {
     return succeed(AgentAction.Up);
 }
 
+function avoidDeath(state: AgentState): Action<AgentAction> {
+    return fail();
+}
+
 export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentAction> {
     const tree = new BehaviorTreeBuilder<AgentState, AgentAction, AgentConfig>(AgentAction.Continue);
 
-    tree.setRootTree('root', execAgent);
+    tree.setRootTree(
+        'root',
+        fallback(
+            blockEnemy,
+            eatFood,
+            avoidDeath,
+        )
+    );
 
     return tree.toBehavior(config);
 }

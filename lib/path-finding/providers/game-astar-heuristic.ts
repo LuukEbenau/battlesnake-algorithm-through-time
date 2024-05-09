@@ -10,7 +10,7 @@ export class GameAStarProviderHeuristic extends AbstractAStarProvider<Vector3Int
 
 	// format is [x][y][t] => t is currently always 0, until implemented
 	private grid: number[][][] = [];
-    private currentDirection = Vector3Int.DEFAULT();
+    private currentDirection = Vector3Int.zero();
 
 	addState(currentDirection: Vector3Int, grid: number[][][]): void {
 		this.currentDirection = currentDirection;
@@ -63,7 +63,7 @@ export class GameAStarProviderHeuristic extends AbstractAStarProvider<Vector3Int
 		return new GameAStarNode(start, this.currentDirection);
 	}
     override inMapGoal(start: Vector3Int, goal: Vector3Int): GameAStarNode {
-        return new GameAStarNode(goal, Vector3Int.DEFAULT());
+        return new GameAStarNode(goal, Vector3Int.zero());
     }
 	override outMap(data: GameAStarNode): Vector3Int {
 		return data.position;

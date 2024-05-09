@@ -41,7 +41,7 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
             const current = this.safeGet(nodeStore, currentId);
 
             if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {
-                const path = this.reconstructPath(nodeStore, cameFrom, startNode, goalNode, goalNodeId, start, goal);
+                const path = this.reconstructPath(nodeStore, cameFrom, startNode, goalNode, currentId, start, goal);
                 this.provider.clear();
 
                 return path;
@@ -71,21 +71,18 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
         return [];
     }
 
-    private reconstructPath(nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>, startNode: TNode, goalNode: TNode, goalNodeId: TNodeId, start: TData, goal: TData): TData[] {
+    private reconstructPath(nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>, startNode: TNode, goalNode: TNode, currentGoalNodeId: TNodeId, start: TData, goal: TData): TData[] {
         const totalPath: TData[] = [];
         totalPath.push(this.provider.outMapGoal(goalNode, start, goal));
 
-        let previousId = goalNodeId;
-        let previous = goalNode;
+        let previousId = currentGoalNodeId;
 
         while (cameFrom.has(previousId)) {
             const currentId = this.safeGet(cameFrom, previousId);
             const current = this.safeGet(nodeStore, currentId);
 
             totalPath.push(this.provider.outMap(current, start, goal));
-
             previousId = currentId;
-            previous = current;
         }
 
         totalPath.reverse();

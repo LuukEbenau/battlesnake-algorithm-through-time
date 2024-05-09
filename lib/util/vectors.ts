@@ -37,7 +37,7 @@ export class Vector3Int extends Vector2Int{
 	public distance(v2:Vector3Int){
 		return Math.sqrt((v2.x - this.x) ** 2 + (v2.y - this.y) ** 2);
 	}
-	public static DEFAULT(): Vector3Int{
+	public static zero(): Vector3Int{
 		return new Vector3Int(0,0,0);
 	}
 

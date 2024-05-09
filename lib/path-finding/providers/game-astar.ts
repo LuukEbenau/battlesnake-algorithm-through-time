@@ -29,10 +29,10 @@ export class GameAStarProvider extends GridAStarProvider {
 		if(cell.y < 0){
 			return false;
 		}
-		if(cell.x >= this.grid.length-1){
+		if(cell.x >= this.grid.length){
 			return false;
 		}
-		if(cell.y >= this.grid[0].length-1){
+		if(cell.y >= this.grid[0].length){
 			return false;
 		}
 		return true;
@@ -46,7 +46,7 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && this.grid[node.position.x][node.position.y][0] <= 1 && (noDirection || !oppositeDirection.equals(direction))) {
+			if (this.cellInsideBoundaries(cell) && this.grid[cell.x][cell.y][0] <= 1 && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}
 		}

@@ -9,7 +9,7 @@ export class GameAStarProvider extends GridAStarProvider {
 		this.grid = grid;
 	}
 
-    distance(a: GridAStarNode, b: GridAStarNode): number {
+    override distance(a: GridAStarNode, b: GridAStarNode): number {
         return super.distance(a, b);
     }
 
@@ -29,7 +29,7 @@ export class GameAStarProvider extends GridAStarProvider {
 		return true;
 	}
 
-    *getNeighbors(node: GridAStarNode): IterableIterator<GridAStarNode> {
+    override *getNeighbors(node: GridAStarNode): IterableIterator<GridAStarNode> {
         const oppositeDirection = new Vector2Int(-node.direction.x, -node.direction.y);
         const noDirection = oppositeDirection.equals(Vector2Int.zero());
 

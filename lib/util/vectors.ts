@@ -1,4 +1,16 @@
+import { Coord } from "../../types";
+
 export class Vector2Int {
+    public static fromCoord(coord: Coord): Vector2Int;
+    public static fromCoord(coord: Coord | undefined): Vector2Int | undefined;
+    public static fromCoord(coord: Coord | undefined): Vector2Int | undefined {
+        if (coord === undefined) {
+            return undefined;
+        }
+
+        return new Vector2Int(coord.x, coord.y);
+    }
+
 	public constructor(public readonly x:number,public readonly y:number){
 		if( x % 1 >0){
 			throw new Error(`While initializing Vector2Int, x value of ${x} was not a integer`);

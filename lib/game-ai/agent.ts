@@ -3,14 +3,15 @@ import { Action, Behavior } from "../behavior-tree";
 import { fail, fallback, succeed } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
+import { GameState } from "../../types";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
  */
 export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
+    get gameState(): GameState;
     get currentPosition(): Vector2Int;
-    getClosestFood(): Vector2Int | undefined;
 }
 
 /**
@@ -31,12 +32,25 @@ export enum AgentAction {
     Right = "right",
 }
 
+function getClosestFood(state: AgentState): Vector2Int | undefined {
+    const position = state.currentPosition;
+
+    return Vector2Int.fromCoord(
+        state.gameState.board
+            .food
+            .map(f => new Vector2Int(f.x, f.y))
+            .map(f => ({ position: f, distance: position.distance(f) }))
+            .sort((a, b) => a.distance - b.distance)[0]
+            ?.position
+    );
+}
+
 function blockEnemy(): Action<AgentAction> {
     return fail();
 }
 
 function eatFood(state: AgentState): Action<AgentAction> {
-    const food = state.getClosestFood();
+    const food = getClosestFood(state);
 
     if (food === undefined) {
         return fail();

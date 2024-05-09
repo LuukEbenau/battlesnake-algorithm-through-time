@@ -10,6 +10,8 @@ export class GameAgentState implements AgentState {
     private state: GameState | undefined;
     readonly aStar: AStar<Vector2Int>;
 
+    private readonly snakeBodyPenalty:number = 40
+
     constructor() {
         this.provider = new GameAStarProvider();
         this.aStar = new StandardAStar(this.provider);
@@ -18,24 +20,23 @@ export class GameAgentState implements AgentState {
     updateState(state: GameState): void {
         this.state = state;
 
-        this.provider.updateState(GameAgentState.createGrid(state.board.width, state.board.height,state));
+        this.provider.updateState(this.createGrid(state.board.width, state.board.height,state));
     }
 
-    private static createGrid(width: number, height: number, state: GameState): number[][][] {
+    private createGrid(width: number, height: number, state: GameState): number[][][] {
       let grid: number[][][] = new Array(width);
-
 
       for (let x: number = 0; x < width; x++) {
           grid[x] = new Array(height);
 
           for (let y: number = 0; y < height; y++) {
-              grid[x][y] = [0];
+              grid[x][y] = [1];
           }
       }
 
       for (const snake of state.board.snakes) {
         for (const coord of snake.body) {
-            grid[coord.x][coord.y][0] = 1; //TODO: instead of putting it to 0, we can put it basically on the snake.body.length - (current index in body), and then at each time step just do -1 for all indexes this might be a more scalable method? however, might also bring some drawbacks, since its not 3d astar anymore
+            grid[coord.x][coord.y][0] = this.snakeBodyPenalty; //TODO: instead of putting it to 0, we can put it basically on the snake.body.length - (current index in body), and then at each time step just do -1 for all indexes this might be a more scalable method? however, might also bring some drawbacks, since its not 3d astar anymore
 
         }
       }

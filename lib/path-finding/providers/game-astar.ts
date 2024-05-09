@@ -7,23 +7,31 @@ export class GameAStarProvider extends GridAStarProvider {
 
 	updateState(grid: number[][][]): void {
 		this.grid = grid;
+
 	}
 
+    private getCoefficient(node: GridAStarNode):number{
+        // TODO: use time dimension
+        let coefficient = this.grid[node.position.x][node.position.y][0];
+        console.log("Coefficient is" + coefficient);
+        return coefficient;
+    }
+
     override distance(a: GridAStarNode, b: GridAStarNode): number {
-        return super.distance(a, b);
+        return this.getCoefficient(b) * super.distance(a, b);
     }
 
 	private cellInsideBoundaries(cell: Vector2Int): boolean {
-		if(cell.x <0){
+		if(cell.x < 0){
 			return false;
 		}
 		if(cell.y < 0){
 			return false;
 		}
-		if(cell.x >= this.grid.length){
+		if(cell.x >= this.grid.length-1){
 			return false;
 		}
-		if(cell.y >= this.grid[0].length){
+		if(cell.y >= this.grid[0].length-1){
 			return false;
 		}
 		return true;
@@ -37,10 +45,9 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && this.grid[cell.x][cell.y][0] === 0
-                && (noDirection || !oppositeDirection.equals(direction))) {
+			if (this.cellInsideBoundaries(cell) && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}
 		}
-    }
+	}
 }

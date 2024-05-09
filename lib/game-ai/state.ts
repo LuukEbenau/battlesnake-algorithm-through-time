@@ -17,8 +17,9 @@ export class GameAgentState implements AgentState {
 
     constructor() {
         this.provider = new GameAStarProvider();
-        this.aStar = new StandardAStar(this.provider);
+
         this.obstacleMap = new ObstacleGrid();
+        this.aStar = new StandardAStar(this.provider);
     }
 
     get gameState() {

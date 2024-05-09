@@ -28,28 +28,25 @@ export class GameAStarProvider extends GridAStarProvider {
         return prevPath
     }
 
-    // private generateNewGridLayerForTimestep(t:number, currentNode: GridAStarNode){
-    //     let prevPath = this.getPrevCellsInPath(currentNode);
-
-    //     let width = this.grid[0].length;
-    //     let height = this.grid[0][0].length;
-
-    //     let gridLayer = new Array(width);
-    //     for (let x: number = 0; x < width; x++) {
-    //         gridLayer[x] = new Array(height);
-
-    //         for (let y: number = 0; y < height; y++) {
-    //             gridLayer[x][y] = 1;
-    //         }
-    //     }
-
-    //     // Now, we need to add a obstacle for each of the tail segments which would still be there at the given timestep. Say the snake is 10 steps long,  we can remove
-    //     return gridLayer;
-    // }
-
     private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
-        // let timestepsInGrid = this.obstacleMap.getGridAtTime(0).length;
         let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
+
+        // For now, check if node is part of path. If this is true, don't consider it
+        let prevNodes = this.getPrevCellsInPath(curNode);
+        let currentPathLength = prevNodes.length;
+        let snakeLength = this.obstacleMap.state?.you.body.length;
+
+        // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
+        let numToSkip =  currentPathLength - (snakeLength as number);
+        if(numToSkip <0) numToSkip = 0;
+        let cellsToCheck = currentPathLength - numToSkip;
+        if(cellsToCheck>0){
+            let partOfPrevNodes = prevNodes.slice(0,cellsToCheck).some(prevNode => nextNode.position.equals(prevNode.position));
+
+            if(partOfPrevNodes){
+                coefficient = 20000;
+            }
+        }
         return coefficient;
     }
 
@@ -64,10 +61,10 @@ export class GameAStarProvider extends GridAStarProvider {
 		if(cell.y < 0){
 			return false;
 		}
-		if(cell.x >= this.obstacleMap.getGridAtTime(0)?.length){
+		if(cell.x >= this.obstacleMap.getGridAtTime(0).length){
 			return false;
 		}
-		if(cell.y >= this.obstacleMap?.getGridAtTime(0)[0]?.length){
+		if(cell.y >= this.obstacleMap?.getGridAtTime(0)[0].length){
 			return false;
 		}
 		return true;

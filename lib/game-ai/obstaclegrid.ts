@@ -30,27 +30,8 @@ export class ObstacleGrid{
         this.width = width;
         this.height = height;
         this.state = state;
-        this.grid = [];//this.createGrid(width,height, state.board.snakes);
+        this.grid = [];
     }
-
-    /**
-     *
-     * @param width Width of the grid
-     * @param height height of the grid
-     * @param state current gamestate
-     * @returns a grid, containing a obstacle map with heuristic coefficients for each grid cell at a given time. output format is T*X*Y
-     */
-    // private createGrid(width: number, height: number, snakes: Battlesnake[]): number[][][] {
-    //     let maxTimesteps: number = 100;// state.you.body.length;
-    //     let grid: number[][][] = new Array(maxTimesteps);
-
-    //     for (let t:number = 0; t< maxTimesteps; t++){
-    //         grid[t] = this.createGridLayer(t,width,height, snakes);
-    //     }
-
-    //     return grid;
-    // }
-
 
     private createGridLayer(t:number, width:number, height: number, snakes:Battlesnake[] ){
         let gridLayer = new Array(width);
@@ -68,24 +49,24 @@ export class ObstacleGrid{
         }
 
         return gridLayer;
-      }
+    }
 
-      /**
-       *
-       * @param currentTime This is the current time step that we are right now
-       * @param t this is the time step which we are trying to predict
-       * @param snake
-       * @param grid
-       */
-      private addSnakeToGrid(currentTime:number, t:number, snake:Battlesnake, grid: number[][]){
+    /**
+     *
+     * @param currentTime This is the current time step that we are right now
+     * @param t this is the time step which we are trying to predict
+     * @param snake
+     * @param grid
+     */
+    private addSnakeToGrid(currentTime:number, t:number, snake:Battlesnake, grid: number[][]){
         let timeDiff : number = t - currentTime;
         let snakeLengthToConsider = snake.body.length - timeDiff;
 
         if(snakeLengthToConsider > 0){
-          for(let bodyPartI: number = 0; bodyPartI < snakeLengthToConsider; bodyPartI++){
-            let bodyPart = snake.body[bodyPartI];
-            grid[bodyPart.x][bodyPart.y] = this.snakeBodyPenalty;
-          }
+            for(let bodyPartI: number = 0; bodyPartI < snakeLengthToConsider; bodyPartI++){
+                let bodyPart = snake.body[bodyPartI];
+                grid[bodyPart.x][bodyPart.y] = this.snakeBodyPenalty;
+            }
         }
-      }
+    }
 }

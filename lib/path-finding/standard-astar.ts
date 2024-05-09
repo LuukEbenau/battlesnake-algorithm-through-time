@@ -5,8 +5,11 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
     constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>) {
     }
+    private iterationCount:number = 0;
+    private readonly maxIterationCount : number = 100;
 
     findPath(start: TData, goal: TData): TData[] {
+        this.iterationCount = 0;
         this.provider.prepare(start, goal);
 
         const startNode = this.provider.inMapStart(start, goal);
@@ -38,6 +41,12 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
         while (!openSet.isEmpty()) {
             const currentId = openSet.dequeue();
+
+            this.iterationCount++;
+            if(this.iterationCount> this.maxIterationCount){
+                console.warn(`Astar timed out after trying ${this.maxIterationCount} iterations. Why did this happen? do we need to increase iteration count?`)
+                break;
+            }
             const current = this.safeGet(nodeStore, currentId);
 
             if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {

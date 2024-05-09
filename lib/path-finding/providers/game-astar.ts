@@ -2,20 +2,17 @@ import { Vector2Int } from "../../util/vectors";
 import { GridAStarNode, GridAStarProvider } from "./grid-astar";
 
 export class GameAStarProvider extends GridAStarProvider {
-	// format is [x][y][t] => t is currently always 0, until implemented
+    /**format is [t][x][y] */
 	private grid: number[][][] = [];
 
 	updateState(grid: number[][][]): void {
 		this.grid = grid;
-
 	}
 
     private getCoefficient(node: GridAStarNode):number{
-        // TODO: use time dimension
-        // let coefficient = this.grid[node.position.x][node.position.y][0];
-        // console.log("Coefficient is" + coefficient);
-        return 1;
-        // return coefficient;
+        let coefficient = this.grid[0][node.position.x][node.position.y];
+        console.log("Coefficient is" + coefficient);
+        return coefficient;
     }
 
     override distance(a: GridAStarNode, b: GridAStarNode): number {
@@ -29,15 +26,16 @@ export class GameAStarProvider extends GridAStarProvider {
 		if(cell.y < 0){
 			return false;
 		}
-		if(cell.x >= this.grid.length){
+		if(cell.x >= this.grid[0].length){
 			return false;
 		}
-		if(cell.y >= this.grid[0].length){
+		if(cell.y >= this.grid[0][0].length){
 			return false;
 		}
 		return true;
 	}
 
+    private _maxHeuristicValue : number = 10000; // maximum heuristic value possible before a node is not searchable.
     override *getNeighbors(node: GridAStarNode): IterableIterator<GridAStarNode> {
         const oppositeDirection = new Vector2Int(-node.direction.x, -node.direction.y);
         const noDirection = oppositeDirection.equals(Vector2Int.zero());
@@ -46,7 +44,8 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && this.grid[cell.x][cell.y][0] <= 1 && (noDirection || !oppositeDirection.equals(direction))) {
+			if (this.cellInsideBoundaries(cell) && this.getCoefficient(neighbor) < this._maxHeuristicValue // just a high number
+                    && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}
 		}

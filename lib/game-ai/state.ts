@@ -30,6 +30,7 @@ export class GameAgentState implements AgentState {
 
     updateState(state: GameState): void {
         this.state = state;
+        this.grid = this.createGrid(state.board.width, state.board.height, state);
 
         this.provider.updateState(this.grid);
     }

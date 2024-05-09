@@ -8,6 +8,10 @@ export function fail<TAction>(): Action<TAction> {
     return new Action(false);
 }
 
+export function status<TState, TAction, TConfig>(statusTask: typeof succeed | typeof fail): Task<TState, TAction, TConfig> {
+    return () => new Action(statusTask().status)
+}
+
 export function tree<TState, TAction, TConfig>(name: string): Task<TState, TAction, TConfig> {
     return (state, config, behaviorTree) => behaviorTree.getTree(name)(state, config, behaviorTree);
 }

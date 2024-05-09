@@ -7,15 +7,24 @@ import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 
 export class GameAgentState implements AgentState {
-    private provider: GameAStarProvider;
-    private state: GameState | undefined;
+    private readonly provider: GameAStarProvider;
+
     readonly aStar: AStar<Vector2Int>;
+
 
     private readonly snakeBodyPenalty:number = 20000 // some high number, as long as its >10000 it should be fine
 
     constructor() {
         this.provider = new GameAStarProvider();
         this.aStar = new StandardAStar(this.provider);
+    }
+
+    get gameState() {
+        if (this.state === undefined) {
+            throw new Error("GameState not defined");
+        }
+
+        return this.state;
     }
 
     updateState(state: GameState): void {
@@ -72,23 +81,6 @@ export class GameAgentState implements AgentState {
     }
 
     get currentPosition(): Vector2Int {
-        const head = this.state?.you.head;
-
-        if (head === undefined) {
-            throw new Error("brain not braining");
-        }
-
-        return new Vector2Int(head.x, head.y);
-    }
-
-    getClosestFood(): Vector2Int | undefined {
-        const position = this.currentPosition;
-
-        return this.state?.board
-            .food
-            .map(f => new Vector2Int(f.x, f.y))
-            .map(f => ({ position: f, distance: position.distance(f) }))
-            .sort((a, b) => a.distance - b.distance)[0]
-            ?.position;
+        return Vector2Int.fromCoord(this.gameState.you.head);
     }
 }

@@ -66,6 +66,8 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
                 const neighborGScore = gScore.get(neighborId);
 
                 if (neighborGScore === undefined || tentativeGScore < neighborGScore) {
+                    nodeStore.set(neighborId, neighbor);
+
                     cameFrom.set(neighborId, currentId);
                     gScore.set(neighborId, tentativeGScore);
 

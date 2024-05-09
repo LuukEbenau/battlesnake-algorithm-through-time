@@ -2,13 +2,24 @@ import { Battlesnake, GameState } from "../../types";
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
+    public width:number;
+    public height:number;
+    public state:GameState | undefined;
 
     public grid: number[][][];
-    public constructor(public readonly width:number, public readonly height:number, public readonly state:GameState){
-        this.grid = this.createGrid(width,height, state.board.snakes);
+    public constructor(){
+        this.width = 0
+        this.height = 0
+        this.state = undefined;
+        this.grid = [];
     }
 
-    // public createInitialGrid(){}
+    public createInitialGrid(width:number, height:number, state:GameState){
+        this.width = width;
+        this.height = height;
+        this.state = state;
+        this.grid = this.createGrid(width,height, state.board.snakes);
+    }
 
     /**
      *

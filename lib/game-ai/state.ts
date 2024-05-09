@@ -11,13 +11,14 @@ export class GameAgentState implements AgentState {
     private readonly provider: GameAStarProvider;
     readonly aStar: AStar<Vector2Int>;
 
-    private obstacleMap!: ObstacleGrid;
+    private obstacleMap: ObstacleGrid;
     state: GameState | undefined;
 
 
     constructor() {
         this.provider = new GameAStarProvider();
         this.aStar = new StandardAStar(this.provider);
+        this.obstacleMap = new ObstacleGrid();
     }
 
     get gameState() {
@@ -30,7 +31,7 @@ export class GameAgentState implements AgentState {
 
     updateState(state: GameState): void {
         this.state = state;
-        this.obstacleMap = new ObstacleGrid(state.board.width,state.board.height, state);
+        this.obstacleMap.createInitialGrid(state.board.width,state.board.height, state);
 
         this.provider.updateState(this.obstacleMap);
     }

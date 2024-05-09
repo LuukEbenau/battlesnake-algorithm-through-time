@@ -1,16 +1,6 @@
 import { AStar, AStarProvider } from ".";
 import { PriorityQueue } from "../util/priority-queue";
 
-function safeGet<K, V>(map: Map<K, V>, key: K): V {
-    const value = map.get(key);
-
-    if (value === undefined) {
-        throw new Error("invalid state");
-    }
-
-    return value;
-}
-
 export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
     constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>) {
@@ -48,7 +38,7 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
         while (!openSet.isEmpty()) {
             const currentId = openSet.dequeue();
-            const current = safeGet(nodeStore, currentId);
+            const current = this.safeGet(nodeStore, currentId);
 
             if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {
                 const path = this.reconstructPath(nodeStore, cameFrom, startNode, goalNode, goalNodeId, start, goal);
@@ -57,7 +47,7 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
                 return path;
             }
 
-            const currentGScore = safeGet(gScore, currentId);
+            const currentGScore = this.safeGet(gScore, currentId);
 
             for (const neighbor of this.provider.getNeighbors(current)) {
                 const neighborId = this.provider.getId(neighbor);
@@ -89,8 +79,8 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
         let previous = goalNode;
 
         while (cameFrom.has(previousId)) {
-            const currentId = safeGet(cameFrom, previousId);
-            const current = safeGet(nodeStore, currentId);
+            const currentId = this.safeGet(cameFrom, previousId);
+            const current = this.safeGet(nodeStore, currentId);
 
             totalPath.push(this.provider.outMap(current, start, goal));
 
@@ -102,6 +92,16 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
         totalPath[0] = this.provider.outMapStart(startNode, start, goal);
 
         return totalPath;
+    }
+
+    private safeGet<K, V>(map: Map<K, V>, key: K): V {
+        const value = map.get(key);
+
+        if (value === undefined) {
+            throw new Error("invalid state");
+        }
+
+        return value;
     }
 
 }

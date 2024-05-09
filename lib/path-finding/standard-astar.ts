@@ -1,9 +1,19 @@
 import { AStar, AStarProvider } from ".";
 import { PriorityQueue } from "../util/priority-queue";
 
-export class StandardAStar<TData, TNode> implements AStar<TData> {
+function safeGet<K, V>(map: Map<K, V>, key: K): V {
+    const value = map.get(key);
 
-    constructor(private readonly provider: AStarProvider<TData, TNode>) {
+    if (value === undefined) {
+        throw new Error("invalid state");
+    }
+
+    return value;
+}
+
+export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
+
+    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>) {
     }
 
     findPath(start: TData, goal: TData): TData[] {
@@ -12,50 +22,55 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
         const startNode = this.provider.inMapStart(start, goal);
         const goalNode = this.provider.inMapGoal(start, goal);
 
-        if (this.provider.isGoalReached(startNode, goalNode)) {
+        const startNodeId = this.provider.getId(startNode);
+        const goalNodeId = this.provider.getId(goalNode);
+
+        if (this.provider.isGoal(startNode, goalNode, startNodeId, goalNodeId)) {
             return [
                 this.provider.outMapStart(startNode, start, goal),
                 this.provider.outMapGoal(goalNode, start, goal),
             ];
         }
 
-        const cameFrom = new Map<TNode, TNode>();
+        const nodeStore = new Map<TNodeId, TNode>();
+        nodeStore.set(startNodeId, startNode);
+        nodeStore.set(goalNodeId, goalNode);
 
-        const gScore = new Map<TNode, number>();
-        gScore.set(startNode, 0);
+        const cameFrom = new Map<TNodeId, TNodeId>();
 
-        const openSet = new PriorityQueue<TNode>();
+        const gScore = new Map<TNodeId, number>();
+        gScore.set(startNodeId, 0);
+
+        const openSet = new PriorityQueue<TNodeId>();
 
         const startFScore = this.provider.heuristic(startNode, goalNode);
-        openSet.enqueue(startNode, startFScore);
+        openSet.enqueue(startNodeId, startFScore);
 
         while (!openSet.isEmpty()) {
-            const current = openSet.dequeue();
+            const currentId = openSet.dequeue();
+            const current = safeGet(nodeStore, currentId);
 
-            if (this.provider.isGoalReached(current, goalNode)) {
-                const path = this.reconstructPath(cameFrom, startNode, current, start, goal);
+            if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {
+                const path = this.reconstructPath(nodeStore, cameFrom, startNode, goalNode, goalNodeId, start, goal);
                 this.provider.clear();
-                console.log(path);
 
                 return path;
             }
 
-            const currentGScore = gScore.get(current);
-
-            if (currentGScore === undefined) {
-                throw new Error("invalid state");
-            }
+            const currentGScore = safeGet(gScore, currentId);
 
             for (const neighbor of this.provider.getNeighbors(current)) {
+                const neighborId = this.provider.getId(neighbor);
+
                 const tentativeGScore = currentGScore + this.provider.distance(current, neighbor);
-                const neighborGScore = gScore.get(neighbor);
+                const neighborGScore = gScore.get(neighborId);
 
                 if (neighborGScore === undefined || tentativeGScore < neighborGScore) {
-                    cameFrom.set(neighbor, current);
-                    gScore.set(neighbor, tentativeGScore);
+                    cameFrom.set(neighborId, currentId);
+                    gScore.set(neighborId, tentativeGScore);
 
                     const neighborFScore = tentativeGScore + this.provider.heuristic(neighbor, goalNode);
-                    openSet.enqueue(neighbor, neighborFScore);
+                    openSet.enqueue(neighborId, neighborFScore);
                 }
             }
         }
@@ -64,17 +79,20 @@ export class StandardAStar<TData, TNode> implements AStar<TData> {
         return [];
     }
 
-    private reconstructPath(cameFrom: Map<TNode, TNode>, startNode: TNode, goalNode: TNode, start: TData, goal: TData): TData[] {
+    private reconstructPath(nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>, startNode: TNode, goalNode: TNode, goalNodeId: TNodeId, start: TData, goal: TData): TData[] {
         const totalPath: TData[] = [];
         totalPath.push(this.provider.outMapGoal(goalNode, start, goal));
 
+        let previousId = goalNodeId;
         let previous = goalNode;
 
-        while (cameFrom.has(previous)) {
-            // TODO: improve type safety?
-            const current = cameFrom.get(previous)!;
+        while (cameFrom.has(previousId)) {
+            const currentId = safeGet(cameFrom, previousId);
+            const current = safeGet(nodeStore, currentId);
 
             totalPath.push(this.provider.outMap(current, start, goal));
+
+            previousId = currentId;
             previous = current;
         }
 

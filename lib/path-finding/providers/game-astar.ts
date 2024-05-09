@@ -12,9 +12,10 @@ export class GameAStarProvider extends GridAStarProvider {
 
     private getCoefficient(node: GridAStarNode):number{
         // TODO: use time dimension
-        let coefficient = this.grid[node.position.x][node.position.y][0];
-        console.log("Coefficient is" + coefficient);
-        return coefficient;
+        // let coefficient = this.grid[node.position.x][node.position.y][0];
+        // console.log("Coefficient is" + coefficient);
+        return 1;
+        // return coefficient;
     }
 
     override distance(a: GridAStarNode, b: GridAStarNode): number {
@@ -45,7 +46,7 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && (noDirection || !oppositeDirection.equals(direction))) {
+			if (this.cellInsideBoundaries(cell) && this.grid[node.position.x][node.position.y][0] <= 1 && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}
 		}

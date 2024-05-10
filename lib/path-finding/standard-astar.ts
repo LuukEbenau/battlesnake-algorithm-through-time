@@ -3,12 +3,10 @@ import { PriorityQueue } from "../util/priority-queue";
 
 export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
-    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>) {
+    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private maxIterationCount = 200) {
     }
-    private iterationCount:number = 0;
-    private maxIterationCount : number = 200;
     findPath(start: TData, goal: TData): TData[] {
-        this.iterationCount = 0;
+        let iterationCount = 0;
 
         this.provider.prepare(start, goal);
 
@@ -42,8 +40,8 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
         while (!openSet.isEmpty()) {
             const currentId = openSet.dequeue();
 
-            this.iterationCount++;
-            if(this.iterationCount> this.provider.maxIterationCount){
+            iterationCount++;
+            if(iterationCount> this.maxIterationCount){
                 console.warn(`Astar timed out after trying ${this.maxIterationCount} iterations. Why did this happen? do we need to increase iteration count?`)
                 break;
             }

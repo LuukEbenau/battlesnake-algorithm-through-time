@@ -40,7 +40,7 @@ function end(gameState: GameState): void {
   console.log("GAME OVER\n");
 }
 
-const state = new GameAgentState();
+const state = new GameAgentState(350);
 const agent = defineAgent({});
 
 let lastMove = AgentAction.Right;

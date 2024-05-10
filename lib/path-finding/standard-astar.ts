@@ -3,7 +3,7 @@ import { PriorityQueue } from "../util/priority-queue";
 
 export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
-    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private maxIterationCount = 200) {
+    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private maxIterationCount = Number.MAX_VALUE) {
     }
     findPath(start: TData, goal: TData): TData[] {
         let iterationCount = 0;

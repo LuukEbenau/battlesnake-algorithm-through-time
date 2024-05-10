@@ -15,11 +15,11 @@ export class GameAgentState implements AgentState {
     state: GameState | undefined;
 
 
-    constructor() {
+    constructor(maxIterationCount: number) {
         this.provider = new GameAStarProvider();
 
         this.obstacleMap = new ObstacleGrid();
-        this.aStar = new StandardAStar(this.provider);
+        this.aStar = new StandardAStar(this.provider, maxIterationCount);
     }
 
     get gameState() {

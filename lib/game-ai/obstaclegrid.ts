@@ -2,7 +2,7 @@ import { Battlesnake, Coord, GameState } from "../../types";
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
-    private readonly potentialEnemyPositionCoefficientAmplifier = 10;
+    private readonly potentialEnemyPositionCoefficientAmplifier = 15;
 
     public width:number;
     public height:number;
@@ -90,7 +90,7 @@ export class ObstacleGrid{
             let x = parseInt(split[0]);
             let y = parseInt(split[1]);
             let probability = pair[1];
-            console.log(`Probability of ${x}:${y} is ${probability}`)
+            // console.log(`Probability of ${x}:${y} is ${probability}`)
 
             let curVal = grid[x][y];
             grid[x][y] = curVal + (probability * this.potentialEnemyPositionCoefficientAmplifier);

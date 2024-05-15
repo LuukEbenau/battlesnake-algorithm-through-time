@@ -109,6 +109,10 @@ function generateTimeGrid(state: AgentState, path: Vector2Int[]): number[][] {
     return grid;
 }
 
+function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
+    return true;
+}
+
 function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
     const agentLength = state.gameState.you.body.length;
     const timeGrid = generateTimeGrid(state, path);
@@ -117,13 +121,23 @@ function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
     let currentTime = 1;
 
     for (let i = 1; i < pathLen; i++) {
-        const result = nextMove(timeGrid, currentTime, path[i], agentLength);
+        const success = nextMove(timeGrid, currentTime, path[i], agentLength);
 
-        if (!result) {
+        if (!success) {
             throw new Error("this should never happen");
         }
 
         currentTime++;
+    }
+
+    const considerTime = currentTime + agentLength;
+
+    for (let i = currentTime; i < considerTime; i++) {
+        const success = findBestNextMove(timeGrid, currentTime, agentLength);
+
+        if (!success) {
+            return false;
+        }
     }
 
     return true;

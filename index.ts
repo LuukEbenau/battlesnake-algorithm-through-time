@@ -41,7 +41,10 @@ function end(gameState: GameState): void {
 }
 
 const state = new GameAgentState(350);
-const agent = defineAgent({});
+const agent = defineAgent({
+    wellFedHealth: 51,
+    killLength: 10,
+});
 
 function move(gameState: GameState): MoveResponse {
 

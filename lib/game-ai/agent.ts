@@ -68,6 +68,10 @@ function blockEnemy(): Action<AgentAction> {
     return fail();
 }
 
+function canEscapeAfterEating(state: AgentState, path: Vector2Int[]): boolean {
+    return true;
+}
+
 function eatSelectedFood(state: AgentState, food: Vector2Int): Action<AgentAction> {
     if (food === undefined) {
         return fail();
@@ -79,18 +83,12 @@ function eatSelectedFood(state: AgentState, food: Vector2Int): Action<AgentActio
         return fail();
     }
 
-    const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
+    if (!canEscapeAfterEating(state, path)) {
+        return fail();
+    }
 
-    if (direction.x < 0) {
-        return succeed(AgentAction.Left);
-    }
-    if (direction.x > 0) {
-        return succeed(AgentAction.Right);
-    }
-    if (direction.y < 0) {
-        return succeed(AgentAction.Down);
-    }
-    return succeed(AgentAction.Up);
+    const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
+    return succeed(directionToAction(direction));
 }
 
 function eatFood(state: AgentState): Action<AgentAction> {

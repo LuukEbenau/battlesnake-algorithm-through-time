@@ -1,3 +1,4 @@
+import { stat } from "fs";
 import { Battlesnake, Coord, GameState } from "../../types";
 import { LOGLEVEL, loglevel } from "../config";
 import { Vector2Int } from "../util/vectors";
@@ -5,8 +6,9 @@ import { TeamCommunicator } from "./team-communicator";
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
+
     private readonly snakeOppositionPenalty = 100
-    private readonly potentialEnemyPositionCoefficientAmplifier = 10; // probably lower?
+    private readonly potentialEnemyPositionCoefficientAmplifier = 14; // probably lower?
 
     public width = 0;
     public height = 0;
@@ -23,7 +25,7 @@ export class ObstacleGrid{
      * @param t
      * @returns
      */
-    public getGridAtTime(t:number):number[][]{
+    public getGridAtTime(t: number):number[][]{
         let currentGridSize = this.grid.length;
         if(t>=currentGridSize){
             // add extra layers, in case it doesnt exist yet
@@ -56,16 +58,27 @@ export class ObstacleGrid{
         let ownHead = this.state.you.head;
 
         for (const snake of snakes) {
-            let isFriendly: boolean = snake.head.x == ownHead.x && snake.head.y == ownHead.y;
+            let isSelf: boolean = snake.head.x == ownHead.x && snake.head.y == ownHead.y;
 
             this.addSnakeToGrid(gridLayer, currentTime, t, snake);
 
             //TODO: other friendly agents paths
 
-            if(!isFriendly){
+            let isFriendlyAgent:boolean = false;
+
+
+            const friendlyAgentPath : Vector2Int[] | undefined = this.teamCommunicator.getFriendlyAgentPath(snake.id);
+
+            if(friendlyAgentPath){
+                this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
+            }
+            else if(!isSelf){
                 // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
                 this.addPotentialEnemyPositions(gridLayer, t, snake);
                 this.addEnemyOppositionPositions(gridLayer, t, this.state.you, snake);
+            }
+            else{
+                //is self
             }
             // opposition principle: if our head and enemy head are both adjacent to a food item, we only want to go there if our snake size is bigger than theirs.
 
@@ -114,6 +127,32 @@ export class ObstacleGrid{
             for(let intersectingCoord of intersectingCoords){
                 // Treat as obstacle
                 gridLayer[intersectingCoord.x][intersectingCoord.y] = this.snakeOppositionPenalty;
+            }
+        }
+    }
+    /**
+     * Add the path from a friendly agents, which we retrieved from the communication layer, to the game as an obstacle.
+     * @param gridLayer
+     * @param t
+     * @param friendlyPath
+     */
+    private addFriendlyAgentPath(gridLayer: number[][], t: number, friendlySnake: Battlesnake, friendlyPath: Vector2Int[]){
+        // For now, check if node is part of path. If this is true, don't consider it
+
+        let path = friendlyPath.slice().reverse(); //NOTE: slice is to not mutate the original. We need to reverse since we cant to calculate from the head, not tail
+
+        let currentPathLength = t;//TODO:check me, can i use t here? does it make sence? //friendlyPath.length;
+        let snakeLength = friendlySnake.body.length;
+
+        // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
+        let numToSkip = currentPathLength - (snakeLength as number);
+        if(numToSkip < 0) numToSkip = 0;
+        let cellCountToCheck = currentPathLength - numToSkip;
+        if(cellCountToCheck > 0){
+            let currentCellsToChecks = path.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
+
+            for(let friendlySnakeCell of currentCellsToChecks){
+                gridLayer[friendlySnakeCell.x][friendlySnakeCell.y] = this.snakeBodyPenalty;
             }
         }
     }

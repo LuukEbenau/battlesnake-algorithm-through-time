@@ -29,14 +29,10 @@ export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridASt
             yield new GridAStarNode(cell, directionVector, node);
 		}
 	}
-	override inMapStart(start: Vector2Int, goal: Vector2Int): GridAStarNode {
-        let startPos3d = new Vector3Int(start.x,start.y,0);
+	override inMap(data: Vector2Int): GridAStarNode {
+        let startPos3d = new Vector3Int(data.x,data.y,0);
 		return new GridAStarNode(startPos3d, Vector3Int.zero(), undefined);
 	}
-    override inMapGoal(start: Vector2Int, goal: Vector2Int): GridAStarNode {
-        let goalPos3d = new Vector3Int(goal.x,goal.y,0);
-        return new GridAStarNode(goalPos3d, Vector3Int.zero(), undefined);
-    }
 	override outMap(data: GridAStarNode): Vector2Int {
 		return new Vector2Int(data.position.x, data.position.y);
 	}

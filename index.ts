@@ -33,7 +33,7 @@ function info(): InfoResponse {
 }
 
 const config: AgentManagerConfig = {
-    aStarMaxIterationCount: 350,
+    aStarMaxIterationCount: 3500,
     wellFedHealth: 51,
     killLength: 10,
 };

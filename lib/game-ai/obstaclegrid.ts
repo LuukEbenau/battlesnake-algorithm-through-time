@@ -1,9 +1,12 @@
 import { Battlesnake, Coord, GameState } from "../../types";
+import { LOGLEVEL, loglevel } from "../config";
+import { Vector2Int } from "../util/vectors";
 import { TeamCommunicator } from "./team-communicator";
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
-    private readonly potentialEnemyPositionCoefficientAmplifier = 15;
+    private readonly snakeOppositionPenalty = 100
+    private readonly potentialEnemyPositionCoefficientAmplifier = 10; // probably lower?
 
     public width = 0;
     public height = 0;
@@ -50,18 +53,71 @@ export class ObstacleGrid{
           }
         }
         // Own positions of snakes
-        let ownHead = this.state?.you.head;
-        for (const snake of snakes) {
-          this.addSnakeToGrid(gridLayer,currentTime, t, snake);
+        let ownHead = this.state.you.head;
 
-          // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
-          if(ownHead && snake.head.x != ownHead.x && snake.head.y != ownHead.y){
-            this.addPotentialEnemyPositions(gridLayer, t, snake);
-          }
+        for (const snake of snakes) {
+            let isFriendly: boolean = snake.head.x == ownHead.x && snake.head.y == ownHead.y;
+
+            this.addSnakeToGrid(gridLayer, currentTime, t, snake);
+
+            //TODO: other friendly agents paths
+
+            if(!isFriendly){
+                // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
+                this.addPotentialEnemyPositions(gridLayer, t, snake);
+                this.addEnemyOppositionPositions(gridLayer, t, this.state.you, snake);
+            }
+            // opposition principle: if our head and enemy head are both adjacent to a food item, we only want to go there if our snake size is bigger than theirs.
+
         }
 
         return gridLayer;
     }
+
+    /**
+     * This function creates obstacles on coordinates around our own head, where the enemy could also be at the next step. In this case, the largest snake will kill the smaller snake
+     * @param gridLayer
+     * @param t
+     * @param ownSnake The own snake
+     * @param otherSnake each of the other snakes except self
+     */
+    private addEnemyOppositionPositions(gridLayer: number[][], t: number, ownSnake: Battlesnake, otherSnake: Battlesnake){
+        // NOTE: this only happens when t=0, since afterwards we don't know where the other snake can be
+        // Step 0: if own snake size > otherSnake, we don't care about opposition. Else, we make it an obstacle if a cell is opposing
+        // Step 1: get opposition coordinates of friendly snake, minus its tail
+        // Step 2: get opposition coordinates of enemy snake, minus its tail
+        // Step 3: get the intersection of these 2
+        //
+        const dirVecs = [new Vector2Int(0,1),new Vector2Int(1,0),new Vector2Int(-1,0),new Vector2Int(0,-1)]
+        if(t == 1 && ownSnake.body.length <= otherSnake.body.length){
+            let ownOppositionCoords: Vector2Int[] = [];
+            let otherSnakeOppositionCoords: Vector2Int[] = [];
+
+            for(let dir of dirVecs){
+                let ownSnakeNewCoord = new Vector2Int(ownSnake.head.x + dir.x, ownSnake.head.y + dir.y);
+                if(ownSnake.body.findIndex(s=>s.x == ownSnakeNewCoord.x && s.y == ownSnakeNewCoord.y) === -1){
+                    // its not part of its body already
+                    ownOppositionCoords.push(ownSnakeNewCoord)
+                }
+
+                let otherSnakeNewCoord = new Vector2Int(otherSnake.head.x + dir.x, otherSnake.head.y + dir.y);
+                if(otherSnake.body.findIndex(s=>s.x == otherSnakeNewCoord.x && s.y == otherSnakeNewCoord.y) === -1){
+                    // its not part of its body already
+                    otherSnakeOppositionCoords.push(otherSnakeNewCoord)
+                }
+            }
+            // Step 3: get intersection
+            let intersectingCoords = ownOppositionCoords
+                .filter(value => otherSnakeOppositionCoords
+                .some(value2=>value.x == value2.x && value.y == value2.y));
+
+            for(let intersectingCoord of intersectingCoords){
+                // Treat as obstacle
+                gridLayer[intersectingCoord.x][intersectingCoord.y] = this.snakeOppositionPenalty;
+            }
+        }
+    }
+
 
     /**
      *
@@ -70,7 +126,7 @@ export class ObstacleGrid{
      * @param snake
      * @param grid
      */
-    private addSnakeToGrid(grid: number[][],currentTime:number, t:number, snake:Battlesnake){
+    private addSnakeToGrid(grid: number[][], currentTime: number, t: number, snake: Battlesnake){
         let timeDiff : number = t - currentTime;
         let snakeLengthToConsider = snake.body.length - timeDiff;
 
@@ -83,13 +139,13 @@ export class ObstacleGrid{
     }
 
     private addPotentialEnemyPositions(grid: number[][], t: number, snake: Battlesnake){
-        let potentialPositionsMap : Map<string,number> = this.computeProbabilities(snake.head,t, grid)
+        let potentialPositionsMap : Map<string,number> = this.computeProbabilities(snake.head, t, grid)
         for(let pair of potentialPositionsMap){
             let split = pair[0].split(',')
             let x = parseInt(split[0]);
             let y = parseInt(split[1]);
             let probability = pair[1];
-            // console.log(`Probability of ${x}:${y} is ${probability}`)
+            if(loglevel <= LOGLEVEL.DEBUG) console.log(`Probability of ${x}:${y} is ${probability}`)
 
             let curVal = grid[x][y];
             grid[x][y] = curVal + (probability * this.potentialEnemyPositionCoefficientAmplifier);
@@ -105,6 +161,8 @@ export class ObstacleGrid{
     private computeProbabilities(head: Coord, t: number, grid: number[][]): Map<string, number> {
         const probabilities = new Map<string, number>();
         let totalProbability = 0;
+
+        t = t + 1
 
         for (let dx = -t; dx <= t; dx++) {
             let x = dx + head.x;

@@ -80,6 +80,8 @@ function pickRandomPosition(state: AgentState): Vector2Int {
 
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
+    const requiredPathLength = 2 * agentLength;
+
     let path: Vector2Int[] = [];
 
     if (escape) {
@@ -88,7 +90,7 @@ function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int
 
             path = state.aStar.findPath(state.currentPosition, target, randomPosition);
 
-            if (path.length >= agentLength) {
+            if (path.length >= requiredPathLength) {
                 break;
             }
         }

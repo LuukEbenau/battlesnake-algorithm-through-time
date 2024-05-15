@@ -27,6 +27,20 @@ export class Vector2Int {
 	public add(v2:Vector2Int){
 		return new Vector2Int(this.x + v2.x, this.y + v2.y); // dont change the instance, since this will give sideeffects
 	}
+
+    public toJSONString() {
+        return JSON.stringify({ x: this.x, y: this.y })
+    }
+
+    public static fromJSONString(jsonString: string): Vector2Int {
+        const vector = JSON.parse(jsonString);
+
+        if (typeof vector.x !== 'number' || typeof vector.y !== 'number') {
+            throw new Error('parsing error');
+        }
+
+        return new Vector2Int(vector.x, vector.y);
+    }
 }
 
 /**
@@ -54,4 +68,19 @@ export class Vector3Int extends Vector2Int{
 	public add(v2:Vector3Int){
 		return new Vector3Int(this.x + v2.x, this.y + v2.y, this.z + v2.z); // dont change the instance, since this will give sideeffects
 	}
+
+
+    public toJSONString() {
+        return JSON.stringify({ x: this.x, y: this.y })
+    }
+
+    public static fromJSONString(jsonString: string): Vector3Int {
+        const vector = JSON.parse(jsonString);
+
+        if (typeof vector.x !== 'number' || typeof vector.y !== 'number' || typeof vector.z !== 'number') {
+            throw new Error('parsing error');
+        }
+
+        return new Vector3Int(vector.x, vector.y, vector.z);
+    }
 }

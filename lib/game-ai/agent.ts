@@ -79,6 +79,7 @@ function nextMove(timeGrid: number[][], currentTime: number, move: Vector2Int, c
         return false;
     }
 
+    timeGrid[move.x][move.y] = currentTime + currentAgentLength;
     return true;
 }
 

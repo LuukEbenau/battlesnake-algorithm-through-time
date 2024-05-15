@@ -5,12 +5,14 @@ import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
 import { iterateDirections } from "../util/grid";
+import { TeamCommunicator } from "./team-communicator";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
  */
 export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
+    readonly teamCommunicator: TeamCommunicator;
     get gameState(): GameState;
     get currentPosition(): Vector2Int;
     isCellFree(cell: Vector2Int): boolean;

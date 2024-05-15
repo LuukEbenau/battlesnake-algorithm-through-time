@@ -2,6 +2,7 @@ import { GameState } from "../../types";
 import { Behavior } from "../behavior-tree";
 import { AgentAction, AgentConfig, AgentState, defineAgent } from "./agent";
 import { GameAgentState, GameAgentStateConfig } from "./state";
+import { TeamCommunicator } from "./team-communicator";
 
 interface AgentData {
     state: GameAgentState;
@@ -12,9 +13,20 @@ export interface AgentManagerConfig extends AgentConfig, GameAgentStateConfig {
 }
 
 export class AgentManager {
+    private readonly teamCommunicator = new TeamCommunicator();
     private readonly agents = new Map<string, AgentData>();
+    private registeredTurnId: number | undefined;
 
     constructor(private readonly config: AgentManagerConfig) {}
+
+    tick(turnId: number): void {
+        if (turnId === this.registeredTurnId) {
+            return;
+        }
+
+        this.registeredTurnId = turnId;
+        this.teamCommunicator.tick();
+    }
 
     performAction(gameState: GameState): AgentAction {
         const agentId = gameState.you.id;
@@ -22,7 +34,7 @@ export class AgentManager {
 
         if (agentData === undefined) {
             agentData = {
-                state: new GameAgentState(this.config, gameState),
+                state: new GameAgentState(this.config, gameState, this.teamCommunicator),
                 agent: defineAgent(this.config),
             }
             this.agents.set(agentId, agentData);

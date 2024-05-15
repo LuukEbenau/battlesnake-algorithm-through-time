@@ -5,6 +5,7 @@ import { StandardAStar } from "../path-finding/standard-astar";
 import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 import { ObstacleGrid } from "./obstaclegrid";
+import { TeamCommunicator } from "./team-communicator";
 
 export interface GameAgentStateConfig {
     aStarMaxIterationCount: number;
@@ -16,8 +17,8 @@ export class GameAgentState implements AgentState {
 
     readonly aStar: AStar<Vector2Int>;
 
-    constructor(config: GameAgentStateConfig, private state: GameState) {
-        this.obstacleMap = new ObstacleGrid(state);
+    constructor(config: GameAgentStateConfig, private state: GameState, public readonly teamCommunicator: TeamCommunicator) {
+        this.obstacleMap = new ObstacleGrid(state, teamCommunicator);
         this.aStar = new StandardAStar(this.provider, config.aStarMaxIterationCount);
     }
 

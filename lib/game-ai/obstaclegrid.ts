@@ -1,4 +1,5 @@
 import { Battlesnake, Coord, GameState } from "../../types";
+import { TeamCommunicator } from "./team-communicator";
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
@@ -8,7 +9,7 @@ export class ObstacleGrid{
     public height = 0;
     private grid: number[][][];
 
-    public constructor(public state: GameState) {
+    public constructor(public state: GameState, public teamCommunicator: TeamCommunicator) {
         this.width = 0
         this.height = 0;
         this.grid = [];

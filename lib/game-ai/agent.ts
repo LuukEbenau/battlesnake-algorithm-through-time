@@ -1,6 +1,6 @@
 import { BehaviorTreeBuilder } from "../behavior-tree/builder";
 import { Action, Behavior } from "../behavior-tree";
-import { fail, fallback, succeed } from "../behavior-tree/tasks";
+import { and, fail, fallback, ite, status, succeed, treeFail } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
@@ -21,6 +21,8 @@ export interface AgentState {
  * Interface for configurational constants
  */
 export interface AgentConfig {
+    readonly wellFedHealth: number;
+    readonly killLength: number;
 }
 
 /**
@@ -52,7 +54,14 @@ function directionToAction(direction: Vector2Int): AgentAction {
         }
     }
     return AgentAction.Continue;
+}
 
+function isWellFed(state: AgentState, config: AgentConfig): Action<AgentAction> {
+    return status(state.gameState.you.health >= config.wellFedHealth);
+}
+
+function isLongEnoughToKill(state: AgentState, config: AgentConfig): Action<AgentAction> {
+    return status(state.gameState.you.body.length >= config.killLength);
 }
 
 function blockEnemy(): Action<AgentAction> {
@@ -123,7 +132,10 @@ export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentActi
     tree.setRootTree(
         'root',
         fallback(
-            blockEnemy,
+            ite(
+                and(isWellFed, isLongEnoughToKill),
+                blockEnemy,
+            ),
             eatFood,
             stayAlive,
         )

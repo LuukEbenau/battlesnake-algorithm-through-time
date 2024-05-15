@@ -1,5 +1,4 @@
-import { stat } from "fs";
-import { Battlesnake, Coord, GameState } from "../../types";
+import { GameState } from "../../types";
 import { AStar } from "../path-finding";
 import { GameAStarProvider } from "../path-finding/providers/game-astar";
 import { StandardAStar } from "../path-finding/standard-astar";
@@ -7,26 +6,22 @@ import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 import { ObstacleGrid } from "./obstaclegrid";
 
+export interface GameAgentStateConfig {
+    aStarMaxIterationCount: number;
+}
+
 export class GameAgentState implements AgentState {
-    private readonly provider: GameAStarProvider;
+    private readonly provider = new GameAStarProvider();
+    private readonly obstacleMap: ObstacleGrid;
+
     readonly aStar: AStar<Vector2Int>;
 
-    private obstacleMap: ObstacleGrid;
-    state: GameState | undefined;
-
-
-    constructor(maxIterationCount: number) {
-        this.provider = new GameAStarProvider();
-
-        this.obstacleMap = new ObstacleGrid();
-        this.aStar = new StandardAStar(this.provider, maxIterationCount);
+    constructor(config: GameAgentStateConfig, private state: GameState) {
+        this.obstacleMap = new ObstacleGrid(state);
+        this.aStar = new StandardAStar(this.provider, config.aStarMaxIterationCount);
     }
 
     get gameState() {
-        if (this.state === undefined) {
-            throw new Error("GameState not defined");
-        }
-
         return this.state;
     }
 

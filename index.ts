@@ -10,8 +10,8 @@
 // To get you started we've included code to prevent your Battlesnake from moving backwards.
 // For more info see docs.battlesnake.com
 
-import { AgentAction, AgentState, defineAgent } from './lib/game-ai/agent';
-import { GameAgentState } from './lib/game-ai/state';
+import { AgentAction } from './lib/game-ai/agent';
+import { AgentManager, AgentManagerConfig } from './lib/game-ai/agent-manager';
 import runServer from './server';
 import { GameState, InfoResponse, MoveResponse } from './types';
 
@@ -32,33 +32,34 @@ function info(): InfoResponse {
   };
 }
 
+const config: AgentManagerConfig = {
+    aStarMaxIterationCount: 350,
+    wellFedHealth: 51,
+    killLength: 10,
+};
+let agentManager = new AgentManager(config);
+
 // start is called when your Battlesnake begins a game
 function start(gameState: GameState): void {
-  console.log("GAME START");
+    agentManager = new AgentManager(config);
+    console.log("GAME START");
 }
 
 // end is called when your Battlesnake finishes a game
 function end(gameState: GameState): void {
-  console.log("GAME OVER\n");
+    console.log("GAME OVER\n");
 }
 
-const state = new GameAgentState(350);
-const agent = defineAgent({});
-
-let lastMove = AgentAction.Right;
-
 function move(gameState: GameState): MoveResponse {
-
     console.time('calculating move');
-    state.updateState(gameState);
-    let move = agent(state);
+    let move = agentManager.performAction(gameState);
     console.timeEnd('calculating move');
+
     console.log(`STEP: ${move}`);
 
     if (move == AgentAction.Continue) {
-        move = lastMove;
-    } else {
-        lastMove = move;
+        // TODO: improve?
+        move = AgentAction.Right;
     }
 
     return { move };

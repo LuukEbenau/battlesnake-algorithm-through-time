@@ -8,8 +8,20 @@ export function fail<TAction>(): Action<TAction> {
     return new Action(false);
 }
 
-export function status<TState, TAction, TConfig>(statusTask: typeof succeed | typeof fail): Task<TState, TAction, TConfig> {
-    return () => new Action(statusTask().status)
+export function status<TAction>(statusBool: boolean): Action<TAction> {
+    return new Action(statusBool);
+}
+
+export function treeSucceed<TState, TAction, TConfig>(): Task<TState, TAction, TConfig> {
+    return () => new Action(true);
+}
+
+export function treeFail<TState, TAction, TConfig>(): Task<TState, TAction, TConfig> {
+    return () => new Action(false);
+}
+
+export function treeStatus<TState, TAction, TConfig>(statusBool: boolean): Task<TState, TAction, TConfig> {
+    return () => new Action(statusBool);
 }
 
 export function tree<TState, TAction, TConfig>(name: string): Task<TState, TAction, TConfig> {
@@ -28,6 +40,23 @@ export function not<TState, TAction, TConfig>(task: Task<TState, TAction, TConfi
         const childAction = task(state, config, behaviorTree);
         return new Action(!childAction.status, childAction.action);
     }
+}
+
+// if-then-else
+export function ite<TState, TAction, TConfig>(decisionTask: Task<TState, TAction, TConfig>, ifTask: Task<TState, TAction, TConfig>, elseTask?: Task<TState, TAction, TConfig>): Task<TState, TAction, TConfig> {
+    return (state, config, behaviorTree) => {
+        const decisionAction = decisionTask(state, config, behaviorTree);
+
+        if (decisionAction.status) {
+            return ifTask(state, config, behaviorTree);
+        }
+
+        if (elseTask === undefined) {
+            return new Action(false);
+        }
+
+        return elseTask(state, config, behaviorTree);
+    };
 }
 
 export function sequence<TState, TAction, TConfig>(...tasks: Task<TState, TAction, TConfig>[]): Task<TState, TAction, TConfig> {
@@ -61,3 +90,7 @@ export function fallback<TState, TAction, TConfig>(...tasks: Task<TState, TActio
         return childAction;
     };
 }
+
+// synonyms for sequence and fallback
+export const and = sequence;
+export const or = fallback;

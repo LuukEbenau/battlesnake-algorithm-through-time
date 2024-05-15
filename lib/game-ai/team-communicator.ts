@@ -4,10 +4,10 @@ import { Vector2Int } from "../util/vectors";
 export class TeamCommunicator {
     private foods: Vector2Int[] = [];
 
-    private foodToOwner = new Map<string, number>();
-    private nextFoodToOwner = new Map<string, number>();
+    private foodToOwner = new Map<string, string>();
+    private nextFoodToOwner = new Map<string, string>();
 
-    private agentPaths = new Map<number, Vector2Int[]>();
+    private agentPaths = new Map<string, Vector2Int[]>();
 
     tick(gameState: GameState): void {
         this.foods = gameState.board.food.map(f => Vector2Int.fromCoord(f));
@@ -17,7 +17,7 @@ export class TeamCommunicator {
 
         this.agentPaths.clear();
     }
-    *iterateAvailableFoods(agentId: number): IterableIterator<Vector2Int> {
+    *iterateAvailableFoods(agentId: string): IterableIterator<Vector2Int> {
         for (const food of this.foods) {
             const foodStr = food.toJSONString();
             const foodOwnerId = this.foodToOwner.get(foodStr);
@@ -28,23 +28,23 @@ export class TeamCommunicator {
             }
         }
     }
-    getAvailableFoods(agentId: number): Vector2Int[] {
+    getAvailableFoods(agentId: string): Vector2Int[] {
         return [...this.iterateAvailableFoods(agentId)];
     }
-    claimFood(agentId: number, food: Vector2Int) {
+    claimFood(agentId: string, food: Vector2Int) {
         this.nextFoodToOwner.set(food.toJSONString(), agentId);
     }
-    *iterateOtherAgentPaths(agentId: number): IterableIterator<Vector2Int[]> {
+    *iterateOtherAgentPaths(agentId: string): IterableIterator<Vector2Int[]> {
         for (const [otherAgentId, path] of this.agentPaths) {
             if (agentId !== otherAgentId) {
                 yield path;
             }
         }
     }
-    getOtherAgentPaths(agentId: number): Vector2Int[][] {
+    getOtherAgentPaths(agentId: string): Vector2Int[][] {
         return [...this.iterateOtherAgentPaths(agentId)];
     }
-    setAgentPath(agentId: number, path: Vector2Int[]): void {
+    setAgentPath(agentId: string, path: Vector2Int[]): void {
         this.agentPaths.set(agentId, path);
     }
 }

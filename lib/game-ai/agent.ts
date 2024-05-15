@@ -13,6 +13,7 @@ import { TeamCommunicator } from "./team-communicator";
 export interface AgentState {
     readonly aStar: AStar<Vector2Int>;
     readonly teamCommunicator: TeamCommunicator;
+    get agentId(): string;
     get gameState(): GameState;
     get currentPosition(): Vector2Int;
     isCellFree(cell: Vector2Int): boolean;
@@ -70,24 +71,23 @@ function blockEnemy(): Action<AgentAction> {
     return fail();
 }
 
-function canEscapeAfterEating(state: AgentState, path: Vector2Int[]): boolean {
+function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
     return true;
 }
 
-function eatSelectedFood(state: AgentState, food: Vector2Int): Action<AgentAction> {
-    if (food === undefined) {
-        return fail();
-    }
-
-    const path = state.aStar.findPath(state.currentPosition, food);
+function registerMove(state: AgentState, target: Vector2Int): Action<AgentAction> {
+    const agentId = state.agentId;
+    const path = state.aStar.findPath(state.currentPosition, target);
 
     if (path.length < 2) {
         return fail();
     }
 
-    if (!canEscapeAfterEating(state, path)) {
+    if (!canEscapeAfterwards(state, path)) {
         return fail();
     }
+
+    state.teamCommunicator.setAgentPath(agentId, path);
 
     const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
     return succeed(directionToAction(direction));
@@ -95,16 +95,19 @@ function eatSelectedFood(state: AgentState, food: Vector2Int): Action<AgentActio
 
 function eatFood(state: AgentState): Action<AgentAction> {
     const position = state.currentPosition;
-    const sortedFoods = state.gameState.board.food
+    const agentId = state.agentId;
+
+    const sortedFoods = state.teamCommunicator.getAvailableFoods(agentId)
         .map(f => new Vector2Int(f.x, f.y))
         .map(f => ({ position: f, distance: position.distance(f) }))
         .sort((a, b) => a.distance - b.distance)
         .map(f => Vector2Int.fromCoord(f.position));
 
     for (const food of sortedFoods) {
-        const action = eatSelectedFood(state, food);
+        const action = registerMove(state, food);
 
         if (action.status) {
+            state.teamCommunicator.claimFood(agentId, food);
             return action;
         }
     }

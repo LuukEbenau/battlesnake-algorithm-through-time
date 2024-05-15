@@ -27,6 +27,7 @@ export interface AgentState {
 export interface AgentConfig {
     readonly wellFedHealth: number;
     readonly killLength: number;
+    readonly escapeRetryCount: number;
 }
 
 /**
@@ -72,96 +73,40 @@ function cutoffEnemy(): Action<AgentAction> {
     return fail();
 }
 
-function nextMove(timeGrid: number[][], currentTime: number, move: Vector2Int, currentAgentLength: number): boolean {
-    const considerFor = timeGrid[move.x][move.y];
-
-    if (considerFor >= currentTime) {
-        return false;
-    }
-
-    timeGrid[move.x][move.y] = currentTime + currentAgentLength;
-    return true;
+function pickRandomPosition(state: AgentState): Vector2Int {
+    const { width, height } = state.gameState.board;
+    return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
 }
 
-function generateTimeGrid(state: AgentState, path: Vector2Int[]): number[][] {
-    const grid: number[][] = [];
-
-    for (let i = 0; i < state.gameState.board.width; i++) {
-        const row: number[] = [];
-        grid.push(row);
-
-        for (let j = 0; j < state.gameState.board.height; j++) {
-            row.push(0);
-        }
-    }
-
-    for (const { body } of state.gameState.board.snakes) {
-        const considerLen = body.length - 1;
-
-        for (let i = 0; i < considerLen; i++) {
-            const coord = body[i];
-            const considerFor = considerLen - i;
-
-            grid[coord.x][coord.y] = considerFor;
-        }
-    }
-
-    return grid;
-}
-
-function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
-    return true;
-}
-
-function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
+function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
-    const timeGrid = generateTimeGrid(state, path);
+    let path: Vector2Int[] = [];
 
-    const pathLen = path.length;
-    let currentTime = 1;
+    if (escape) {
+        for (let i = 0; i < config.escapeRetryCount; i++) {
+            const randomPosition = pickRandomPosition(state);
 
-    for (let i = 1; i < pathLen; i++) {
-        const success = nextMove(timeGrid, currentTime, path[i], agentLength);
+            path = state.aStar.findPath(state.currentPosition, target, randomPosition);
 
-        if (!success) {
-            throw new Error("this should never happen");
+            if (path.length >= agentLength) {
+                break;
+            }
         }
-
-        currentTime++;
+    } else {
+        path = state.aStar.findPath(state.currentPosition, target);
     }
-
-    const considerTime = currentTime + agentLength;
-
-    for (let i = currentTime; i < considerTime; i++) {
-        const success = findBestNextMove(timeGrid, currentTime, agentLength);
-
-        if (!success) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function registerMove(state: AgentState, target: Vector2Int): Action<AgentAction> {
-    const agentId = state.agentId;
-    const path = state.aStar.findPath(state.currentPosition, target);
 
     if (path.length < 2) {
         return fail();
     }
 
-    if (!canEscapeAfterwards(state, path)) {
-        return fail();
-    }
-
-    state.teamCommunicator.setAgentPath(agentId, path);
+    state.teamCommunicator.setAgentPath(state.agentId, path);
 
     const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
     return succeed(directionToAction(direction));
 }
 
-function eatFood(state: AgentState): Action<AgentAction> {
+function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
     const position = state.currentPosition;
     const agentId = state.agentId;
 
@@ -172,7 +117,7 @@ function eatFood(state: AgentState): Action<AgentAction> {
         .map(f => Vector2Int.fromCoord(f.position));
 
     for (const food of sortedFoods) {
-        const action = registerMove(state, food);
+        const action = registerMove(state, config, food);
 
         if (action.status) {
             state.teamCommunicator.claimFood(agentId, food);

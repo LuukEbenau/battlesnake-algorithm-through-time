@@ -1,5 +1,5 @@
 export interface AStar<T> {
-    findPath(start: T, goal: T): T[];
+    findPath(start: T, ...goals: T[]): T[];
 }
 
 export interface AStarProvider<TData, TNode, TNodeId> {

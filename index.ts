@@ -36,6 +36,7 @@ const config: AgentManagerConfig = {
     aStarMaxIterationCount: 3500,
     wellFedHealth: 51,
     killLength: 10,
+    escapeRetryCount: 10,
 };
 let agentManager = new AgentManager(config);
 

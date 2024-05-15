@@ -2,20 +2,25 @@ import { GameState } from "../../types";
 import { Vector2Int } from "../util/vectors";
 
 export class TeamCommunicator {
+    private readonly teamIds = new Set<string>();
+
     private foods: Vector2Int[] = [];
 
     private foodToOwner = new Map<string, string>();
     private nextFoodToOwner = new Map<string, string>();
 
     private agentPaths = new Map<string, Vector2Int[]>();
+    private nextAgentPaths = new Map<string, Vector2Int[]>();
 
     tick(gameState: GameState): void {
+        this.teamIds.add(gameState.you.id);
         this.foods = gameState.board.food.map(f => Vector2Int.fromCoord(f));
 
         this.foodToOwner = this.nextFoodToOwner;
         this.nextFoodToOwner = new Map();
 
-        this.agentPaths.clear();
+        this.agentPaths = this.nextAgentPaths;
+        this.nextAgentPaths = new Map();
     }
     *iterateAvailableFoods(agentId: string): IterableIterator<Vector2Int> {
         for (const food of this.foods) {
@@ -34,17 +39,20 @@ export class TeamCommunicator {
     claimFood(agentId: string, food: Vector2Int) {
         this.nextFoodToOwner.set(food.toJSONString(), agentId);
     }
-    *iterateOtherAgentPaths(agentId: string): IterableIterator<Vector2Int[]> {
-        for (const [otherAgentId, path] of this.agentPaths) {
-            if (agentId !== otherAgentId) {
-                yield path;
+    getFriendlyAgentPath(agentId: string): Vector2Int[] | undefined {
+        return this.agentPaths.get(agentId);
+    }
+    setAgentPath(agentId: string, path: Vector2Int[]): void {
+        this.nextAgentPaths.set(agentId, path);
+    }
+    *iterateTeamMembers(agentId: string): IterableIterator<string> {
+        for (const otherAgentId of this.teamIds) {
+            if (otherAgentId !== agentId) {
+                yield otherAgentId;
             }
         }
     }
-    getOtherAgentPaths(agentId: string): Vector2Int[][] {
-        return [...this.iterateOtherAgentPaths(agentId)];
-    }
-    setAgentPath(agentId: string, path: Vector2Int[]): void {
-        this.agentPaths.set(agentId, path);
+    getTeamMembers(agentId: string): string[] {
+        return [...this.iterateTeamMembers(agentId)];
     }
 }

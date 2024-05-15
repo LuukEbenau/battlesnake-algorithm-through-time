@@ -68,11 +68,78 @@ function isLongEnoughToKill(state: AgentState, config: AgentConfig): Action<Agen
     return status(state.gameState.you.body.length >= config.killLength);
 }
 
-function blockEnemy(): Action<AgentAction> {
+function cutoffEnemy(): Action<AgentAction> {
     return fail();
 }
 
+function nextMove(timeGrid: number[][], currentTime: number, move: Vector2Int, currentAgentLength: number): boolean {
+    const considerFor = timeGrid[move.x][move.y];
+
+    if (considerFor >= currentTime) {
+        return false;
+    }
+
+    timeGrid[move.x][move.y] = currentTime + currentAgentLength;
+    return true;
+}
+
+function generateTimeGrid(state: AgentState, path: Vector2Int[]): number[][] {
+    const grid: number[][] = [];
+
+    for (let i = 0; i < state.gameState.board.width; i++) {
+        const row: number[] = [];
+        grid.push(row);
+
+        for (let j = 0; j < state.gameState.board.height; j++) {
+            row.push(0);
+        }
+    }
+
+    for (const { body } of state.gameState.board.snakes) {
+        const considerLen = body.length - 1;
+
+        for (let i = 0; i < considerLen; i++) {
+            const coord = body[i];
+            const considerFor = considerLen - i;
+
+            grid[coord.x][coord.y] = considerFor;
+        }
+    }
+
+    return grid;
+}
+
+function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
+    return true;
+}
+
 function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
+    const agentLength = state.gameState.you.body.length;
+    const timeGrid = generateTimeGrid(state, path);
+
+    const pathLen = path.length;
+    let currentTime = 1;
+
+    for (let i = 1; i < pathLen; i++) {
+        const success = nextMove(timeGrid, currentTime, path[i], agentLength);
+
+        if (!success) {
+            throw new Error("this should never happen");
+        }
+
+        currentTime++;
+    }
+
+    const considerTime = currentTime + agentLength;
+
+    for (let i = currentTime; i < considerTime; i++) {
+        const success = findBestNextMove(timeGrid, currentTime, agentLength);
+
+        if (!success) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -138,7 +205,7 @@ export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentActi
         fallback(
             ite(
                 and(isWellFed, isLongEnoughToKill),
-                blockEnemy,
+                cutoffEnemy,
             ),
             eatFood,
             stayAlive,

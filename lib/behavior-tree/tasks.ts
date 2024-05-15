@@ -77,3 +77,7 @@ export function fallback<TState, TAction, TConfig>(...tasks: Task<TState, TActio
         return childAction;
     };
 }
+
+// synonyms for sequence and fallback
+export const and = sequence;
+export const or = fallback;

@@ -12,19 +12,16 @@ export interface GameAgentStateConfig {
 
 export class GameAgentState implements AgentState {
     private readonly provider = new GameAStarProvider();
-    private readonly obstacleMap = new ObstacleGrid();
+    private readonly obstacleMap: ObstacleGrid;
 
     readonly aStar: AStar<Vector2Int>;
 
     constructor(config: GameAgentStateConfig, private state: GameState) {
+        this.obstacleMap = new ObstacleGrid(state);
         this.aStar = new StandardAStar(this.provider, config.aStarMaxIterationCount);
     }
 
     get gameState() {
-        if (this.state === undefined) {
-            throw new Error("GameState not defined");
-        }
-
         return this.state;
     }
 

@@ -4,10 +4,15 @@ export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
     private readonly potentialEnemyPositionCoefficientAmplifier = 15;
 
-    public width:number;
-    public height:number;
-    public state:GameState | undefined;
+    public width = 0;
+    public height = 0;
     private grid: number[][][];
+
+    public constructor(public state: GameState) {
+        this.width = 0
+        this.height = 0;
+        this.grid = [];
+    }
 
     /**
      * Get the grid at a certain timestep. If the grid at that timestep doesnt already exist, create and calculate the grid for the time step
@@ -24,13 +29,6 @@ export class ObstacleGrid{
         }
 
         return this.grid[t];
-    }
-
-    public constructor(){
-        this.width = 0
-        this.height = 0
-        this.state = undefined;
-        this.grid = [];
     }
 
     public createInitialGrid(width:number, height:number, state:GameState){

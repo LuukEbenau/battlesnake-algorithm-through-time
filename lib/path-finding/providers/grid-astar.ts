@@ -3,7 +3,7 @@ import { getDirections } from "../../util/grid";
 import { Vector3Int, Vector2Int } from "../../util/vectors";
 
 export class GridAStarNode {
-    constructor(public readonly position: Vector3Int, public readonly direction: Vector3Int, public prevNode : GridAStarNode|undefined) {}
+    constructor(public readonly position: Vector3Int, public readonly direction: Vector3Int, public readonly prevNode : GridAStarNode|undefined) {}
 }
 
 export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridAStarNode, string> {

@@ -1,3 +1,4 @@
+import { LOGLEVEL, loglevel } from "../../config";
 import { ObstacleGrid } from "../../game-ai/obstaclegrid";
 import { Vector2Int, Vector3Int } from "../../util/vectors";
 import { GridAStarNode, GridAStarProvider } from "./grid-astar";
@@ -28,18 +29,34 @@ export class GameAStarProvider extends GridAStarProvider {
         return prevPath
     }
 
+    /**
+     * This function checks if a cell is part of the current snake body at the given timestep.
+     * @param curNode The node where the snake is currently at
+     * @param nextNode The node which we are checking right now, so a possible new cell for the snake head
+     * @returns
+     */
     private _getAvoidPreviousPathCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode){
         // For now, check if node is part of path. If this is true, don't consider it
         let prevNodes = this.getPrevCellsInPath(curNode);
         let currentPathLength = prevNodes.length;
-        let snakeLength = this.obstacleMap.state?.you.body.length;
+        let snakeLength = this.obstacleMap.state.you.body.length;
 
         // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
         let numToSkip = currentPathLength - (snakeLength as number);
         if(numToSkip <0) numToSkip = 0;
-        let cellsToCheck = currentPathLength - numToSkip;
-        if(cellsToCheck>0){
-            let partOfPrevNodes = prevNodes.slice(0,cellsToCheck).some(prevNode => nextNode.position.equals(prevNode.position));
+        let cellCountToCheck = currentPathLength - numToSkip;
+        if(cellCountToCheck > 0){
+            let currentCellsToChecks = prevNodes.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
+
+            if(loglevel <= LOGLEVEL.DEBUG && snakeLength && snakeLength===4){
+                let snakeString = "";
+                for(let cell of currentCellsToChecks){
+                    snakeString += "("+`${cell.position.x}|${cell.position.y}` + ")-";
+                }
+                console.log(`Snake of length ${snakeLength} and shape at timestep ${nextNode.position.z}: ${snakeString}`);
+            }
+
+            let partOfPrevNodes = currentCellsToChecks.some(prevNode => nextNode.position.equals(prevNode.position));
 
             if(partOfPrevNodes){
                 return 20000;

@@ -5,6 +5,7 @@ import { AStar } from "../path-finding";
 import { Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
 import { iterateDirections } from "../util/grid";
+import { LOGLEVEL, loglevel } from "../config";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
@@ -114,7 +115,7 @@ function eatFood(state: AgentState): Action<AgentAction> {
 
 function stayAlive(state: AgentState): Action<AgentAction> {
     const position = state.currentPosition;
-
+    if(loglevel <= LOGLEVEL.INFO) console.log("Initializing stayAlive sequence");
     for (const direction of iterateDirections()) {
         const cell = position.add(direction);
 

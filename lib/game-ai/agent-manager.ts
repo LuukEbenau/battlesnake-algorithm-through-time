@@ -19,13 +19,15 @@ export class AgentManager {
 
     constructor(private readonly config: AgentManagerConfig) {}
 
-    tick(turnId: number): void {
+    tick(gameState: GameState): void {
+        const turnId = gameState.turn;
+
         if (turnId === this.registeredTurnId) {
             return;
         }
 
         this.registeredTurnId = turnId;
-        this.teamCommunicator.tick();
+        this.teamCommunicator.tick(gameState);
     }
 
     performAction(gameState: GameState): AgentAction {

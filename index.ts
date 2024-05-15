@@ -52,8 +52,10 @@ function end(gameState: GameState): void {
 
 function move(gameState: GameState): MoveResponse {
     console.time('calculating move');
-    agentManager.tick(gameState.turn);
+
+    agentManager.tick(gameState);
     let move = agentManager.performAction(gameState);
+
     console.timeEnd('calculating move');
 
     console.log(`STEP: ${move}`);

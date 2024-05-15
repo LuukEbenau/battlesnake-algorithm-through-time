@@ -8,8 +8,11 @@ export function fail<TAction>(): Action<TAction> {
     return new Action(false);
 }
 
-export function status<TState, TAction, TConfig>(statusTask: typeof succeed | typeof fail): Task<TState, TAction, TConfig> {
-    return () => new Action(statusTask().status)
+export function status<TState, TAction, TConfig>(statusBoolOrTask: boolean | typeof succeed | typeof fail): Task<TState, TAction, TConfig> {
+    if (typeof statusBoolOrTask === 'boolean') {
+        return () => new Action(statusBoolOrTask);
+    }
+    return () => new Action(statusBoolOrTask().status)
 }
 
 export function tree<TState, TAction, TConfig>(name: string): Task<TState, TAction, TConfig> {

@@ -8,6 +8,7 @@ export class TeamCommunicator {
     private nextFoodToOwner = new Map<string, string>();
 
     private agentPaths = new Map<string, Vector2Int[]>();
+    private nextAgentPaths = new Map<string, Vector2Int[]>();
 
     tick(gameState: GameState): void {
         this.foods = gameState.board.food.map(f => Vector2Int.fromCoord(f));
@@ -15,7 +16,8 @@ export class TeamCommunicator {
         this.foodToOwner = this.nextFoodToOwner;
         this.nextFoodToOwner = new Map();
 
-        this.agentPaths.clear();
+        this.agentPaths = this.nextAgentPaths;
+        this.nextAgentPaths = new Map();
     }
     *iterateAvailableFoods(agentId: string): IterableIterator<Vector2Int> {
         for (const food of this.foods) {
@@ -45,6 +47,6 @@ export class TeamCommunicator {
         return [...this.iterateOtherAgentPaths(agentId)];
     }
     setAgentPath(agentId: string, path: Vector2Int[]): void {
-        this.agentPaths.set(agentId, path);
+        this.nextAgentPaths.set(agentId, path);
     }
 }

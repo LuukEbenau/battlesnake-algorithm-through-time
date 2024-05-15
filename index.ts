@@ -43,8 +43,6 @@ function end(gameState: GameState): void {
 const state = new GameAgentState(350);
 const agent = defineAgent({});
 
-let lastMove = AgentAction.Right;
-
 function move(gameState: GameState): MoveResponse {
 
     console.time('calculating move');
@@ -54,9 +52,8 @@ function move(gameState: GameState): MoveResponse {
     console.log(`STEP: ${move}`);
 
     if (move == AgentAction.Continue) {
-        move = lastMove;
-    } else {
-        lastMove = move;
+        // TODO: improve?
+        move = AgentAction.Right;
     }
 
     return { move };

@@ -1,12 +1,12 @@
 import { Behavior, BehaviorTree, Task } from ".";
-import { succeed, status } from "./tasks";
+import { treeSucceed } from "./tasks";
 
 export class BehaviorTreeBuilder<TState, TAction, TConfig> implements BehaviorTree<TState, TAction, TConfig> {
     private readonly trees = new Map<string, Task<TState, TAction, TConfig>>();
     private rootName = '';
 
     constructor(private readonly noopAction: TAction) {
-        this.setRootTree('root', status(succeed));
+        this.setRootTree('root', treeSucceed());
     }
 
     setTree(name: string, tree: Task<TState, TAction, TConfig>): BehaviorTreeBuilder<TState, TAction, TConfig> {

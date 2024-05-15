@@ -42,6 +42,7 @@ export function not<TState, TAction, TConfig>(task: Task<TState, TAction, TConfi
     }
 }
 
+// if-then-else
 export function ite<TState, TAction, TConfig>(decisionTask: Task<TState, TAction, TConfig>, ifTask: Task<TState, TAction, TConfig>, elseTask?: Task<TState, TAction, TConfig>): Task<TState, TAction, TConfig> {
     return (state, config, behaviorTree) => {
         const decisionAction = decisionTask(state, config, behaviorTree);

@@ -56,7 +56,7 @@ export class TeamCommunicator {
     getAllFoods(): Vector2Int[] {
         return this.foods;
     }
-    claimFood(agentId: string, food: Vector2Int) {
+    claimFood(agentId: string, food: Vector2Int): void {
         this.nextFoodToOwner.set(food.toJSONString(), agentId);
     }
     getFriendlyAgentPath(agentId: string): Vector2Int[] | undefined {
@@ -100,5 +100,8 @@ export class TeamCommunicator {
     }
     getTargetableEnemies(agentId: string, distance: (agentPos: Vector2Int[], enemyPos: Vector2Int[]) => number): [string, Vector2Int[]][] {
         return [...this.iterateTargetableEnemies(agentId, distance)];
+    }
+    targetEnemy(agentId: string, enemyId: string): void {
+        this.nextEnemyToOwner.set(enemyId, agentId);
     }
 }

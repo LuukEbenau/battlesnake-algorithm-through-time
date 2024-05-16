@@ -13,11 +13,13 @@ export interface AgentManagerConfig extends AgentConfig, GameAgentStateConfig {
 }
 
 export class AgentManager {
-    private readonly teamCommunicator = new TeamCommunicator();
+    private readonly teamCommunicator: TeamCommunicator;
     private readonly agents = new Map<string, AgentData>();
     private registeredTurnId: number | undefined;
 
-    constructor(private readonly config: AgentManagerConfig) {}
+    constructor(private readonly config: AgentManagerConfig) {
+        this.teamCommunicator = new TeamCommunicator(config.maxAgentsPerformingCutoff);
+    }
 
     tick(gameState: GameState): void {
         const turnId = gameState.turn;

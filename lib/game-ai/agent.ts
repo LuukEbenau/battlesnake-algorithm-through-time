@@ -30,6 +30,8 @@ export interface AgentConfig {
     readonly wellFedHealth: number;
     readonly killLength: number;
     readonly escapeRetryCount: number;
+    readonly cutoffDistance: number;
+    readonly maxAgentsPerformingCutoff: number;
 }
 
 /**
@@ -71,16 +73,40 @@ function isLongEnoughToKill(state: AgentState, config: AgentConfig): Action<Agen
     return status(state.gameState.you.body.length >= config.killLength);
 }
 
-function cutoffEnemy(): Action<AgentAction> {
+function performCutoff(state: AgentState, config: AgentConfig, enemyBody: Vector2Int[]): Vector2Int[] {
+    return [];
+}
+
+function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction> {
+    let enemy: [string, Vector2Int[]];
+
+    const targets = state.teamCommunicator.iterateTargetableEnemies(
+        state.agentId,
+        (a, b) => a[0].distance(b[0])
+    );
+
+    for (const [enemyId, body] of targets) {
+        const cutoffPath = performCutoff(state, config, body);
+
+        if (cutoffPath.length < 2) {
+            continue;
+        }
+
+        const action = registerPath(state, config, cutoffPath);
+
+        if (action.status) {
+            return action;
+        }
+    }
+
     return fail();
 }
 
-function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
-    const agentLength = state.gameState.you.body.length;
+function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int): Action<AgentAction> {
+    return registerPath(state, config, state.aStar.findPath(state.currentPosition, target));
+}
 
-    let path: Vector2Int[] = [];
-
-    path = state.aStar.findPath(state.currentPosition, target);
+function registerPath(state: AgentState, config: AgentConfig, path: Vector2Int[]): Action<AgentAction> {
 
     if (path.length < 2) {
         return fail();
@@ -90,10 +116,6 @@ function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int
 
     const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
     return succeed(directionToAction(direction));
-}
-
-function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
-    return true;
 }
 
 function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {

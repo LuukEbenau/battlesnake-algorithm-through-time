@@ -40,7 +40,7 @@ export class GameAStarProvider extends GridAStarProvider {
      * @param nextNode The node which we are checking right now, so a possible new cell for the snake head
      * @returns
      */
-    private _getAvoidPreviousPathCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode){
+    private NodeIsPartOfCurrentPath(curNode:GridAStarNode, nextNode: GridAStarNode) : boolean{
         // For now, check if node is part of path. If this is true, don't consider it
         let prevNodes = this.getPrevCellsInPath(curNode);
         let currentPathLength = prevNodes.length;
@@ -64,20 +64,19 @@ export class GameAStarProvider extends GridAStarProvider {
             let partOfPrevNodes = currentCellsToChecks.some(prevNode => nextNode.position.equals(prevNode.position));
 
             if(partOfPrevNodes){
-                return 20000;
+                return true;
             }
         }
-
-        return 0;
+        return false;
     }
 
     private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
         let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
 
-        let nextNodeCoefficient = this._getAvoidPreviousPathCoefficient(curNode,nextNode)
-        if(nextNodeCoefficient>0){
-            coefficient = nextNodeCoefficient;
-        }
+        // let nextNodeCoefficient = this._getAvoidPreviousPathCoefficient(curNode,nextNode)
+        // if(nextNodeCoefficient>0){
+        //     coefficient = nextNodeCoefficient;
+        // }
 
         return coefficient;
     }
@@ -110,7 +109,7 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && this.getCoefficient(node,neighbor) < this._maxHeuristicValue // just a high number
+			if (this.cellInsideBoundaries(cell) && !this.NodeIsPartOfCurrentPath(node, neighbor) && this.getCoefficient(node,neighbor) < this._maxHeuristicValue // just a high number
                     && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}

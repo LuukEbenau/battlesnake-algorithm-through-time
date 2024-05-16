@@ -114,33 +114,34 @@ function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgen
 }
 
 function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
-    const agentLength = state.gameState.you.body.length;
-    const timeGrid = generateTimeGrid(state, path);
-
-    const pathLen = path.length;
-    let currentTime = 1;
-
-    for (let i = 1; i < pathLen; i++) {
-        const success = nextMove(timeGrid, currentTime, path[i], agentLength);
-
-        if (!success) {
-            throw new Error("this should never happen");
-        }
-
-        currentTime++;
-    }
-
-    const considerTime = currentTime + agentLength;
-
-    for (let i = currentTime; i < considerTime; i++) {
-        const success = findBestNextMove(timeGrid, currentTime, agentLength);
-
-        if (!success) {
-            return false;
-        }
-    }
-
     return true;
+    // const agentLength = state.gameState.you.body.length;
+    // const timeGrid = generateTimeGrid(state, path);
+
+    // const pathLen = path.length;
+    // let currentTime = 1;
+
+    // for (let i = 1; i < pathLen; i++) {
+    //     const success = nextMove(timeGrid, currentTime, path[i], agentLength);
+
+    //     if (!success) {
+    //         throw new Error("this should never happen");
+    //     }
+
+    //     currentTime++;
+    // }
+
+    // const considerTime = currentTime + agentLength;
+
+    // for (let i = currentTime; i < considerTime; i++) {
+    //     const success = findBestNextMove(timeGrid, currentTime, agentLength);
+
+    //     if (!success) {
+    //         return false;
+    //     }
+    // }
+
+    // return true;
 }
 
 function registerMove(state: AgentState, target: Vector2Int): Action<AgentAction> {

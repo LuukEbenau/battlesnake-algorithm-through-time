@@ -3,12 +3,13 @@ import { Battlesnake, Coord, GameState } from "../../types";
 import { LOGLEVEL, loglevel } from "../config";
 import { Vector2Int } from "../util/vectors";
 import { TeamCommunicator } from "./team-communicator";
+import * as fs from 'fs';
 
 export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
-
+    private readonly friendlySnakePathCollisionPenalty = 200;
     private readonly snakeOppositionPenalty = 100
-    private readonly potentialEnemyPositionCoefficientAmplifier = 14; // probably lower?
+    private readonly potentialEnemyPositionCoefficientAmplifier = 15; // probably lower?
 
     public width = 0;
     public height = 0;
@@ -31,6 +32,10 @@ export class ObstacleGrid{
             // add extra layers, in case it doesnt exist yet
             for(let i = currentGridSize; i <= t; i++){
                 this.grid[i] = this.createGridLayer(i,this.width, this.height, this.state?.board.snakes as Battlesnake[])
+            }
+
+            if(t == 1 && loglevel <= LOGLEVEL.DEBUG){
+                this.writeToFile(t);
             }
         }
 
@@ -66,15 +71,15 @@ export class ObstacleGrid{
 
             let isFriendlyAgent:boolean = false;
 
-
-            const friendlyAgentPath : Vector2Int[] | undefined = this.teamCommunicator.getFriendlyAgentPath(snake.id);
-
-            if(friendlyAgentPath){
-                this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
-            }
-            else if(!isSelf){
-                // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
-                this.addPotentialEnemyPositions(gridLayer, t, snake);
+            if(!isSelf){
+                // const friendlyAgentPath : Vector2Int[] | undefined = this.teamCommunicator.getFriendlyAgentPath(snake.id);
+                // if(friendlyAgentPath){
+                //     this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
+                // }
+                // else{
+                    // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
+                    this.addPotentialEnemyPositions(gridLayer, t, snake);
+                // }
                 this.addEnemyOppositionPositions(gridLayer, t, this.state.you, snake);
             }
             else{
@@ -86,6 +91,33 @@ export class ObstacleGrid{
 
         return gridLayer;
     }
+
+
+    private generateSymbolGrid(t:number): string[][] {
+        let transposedGrid = this.getGridAtTime(t).map((_, colIndex) => this.getGridAtTime(t).map(row => row[colIndex])).reverse();
+        return transposedGrid.map(row =>
+            row.map(value => {
+                if (value <= 1) {
+                    return 'o';
+                } else if (value > 1 && value < 10) {
+                    return '%';
+                } else {
+                    return 'X';
+                }
+            })
+        );
+    }
+
+    public writeToFile(t:number): void {
+        const filename = `logs/obstaclemap-states-${this.state.game.id}-${this.state.you.name}.log`;
+
+        const symbolGrid = this.generateSymbolGrid(t);
+        let fileContent = symbolGrid.map(row => row.join(' ')).join('\n') + '\n';
+        fileContent = `Turn ${this.state.turn}:\n${fileContent}`;
+
+        fs.writeFileSync(filename, fileContent, { flag: 'a', encoding: 'utf-8' });
+    }
+
 
     /**
      * This function creates obstacles on coordinates around our own head, where the enemy could also be at the next step. In this case, the largest snake will kill the smaller snake
@@ -102,7 +134,7 @@ export class ObstacleGrid{
         // Step 3: get the intersection of these 2
         //
         const dirVecs = [new Vector2Int(0,1),new Vector2Int(1,0),new Vector2Int(-1,0),new Vector2Int(0,-1)]
-        if(t == 1 && ownSnake.body.length <= otherSnake.body.length){
+        if(t <= 1 && ownSnake.body.length <= otherSnake.body.length){
             let ownOppositionCoords: Vector2Int[] = [];
             let otherSnakeOppositionCoords: Vector2Int[] = [];
 
@@ -126,7 +158,7 @@ export class ObstacleGrid{
 
             for(let intersectingCoord of intersectingCoords){
                 // Treat as obstacle
-                gridLayer[intersectingCoord.x][intersectingCoord.y] = this.snakeOppositionPenalty;
+                gridLayer[intersectingCoord.x][intersectingCoord.y] = Math.max(gridLayer[intersectingCoord.x][intersectingCoord.y], this.snakeOppositionPenalty);
             }
         }
     }
@@ -152,7 +184,7 @@ export class ObstacleGrid{
             let currentCellsToChecks = path.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
 
             for(let friendlySnakeCell of currentCellsToChecks){
-                gridLayer[friendlySnakeCell.x][friendlySnakeCell.y] = this.snakeBodyPenalty;
+                gridLayer[friendlySnakeCell.x][friendlySnakeCell.y] = Math.max(gridLayer[friendlySnakeCell.x][friendlySnakeCell.y], this.friendlySnakePathCollisionPenalty);
             }
         }
     }
@@ -166,7 +198,7 @@ export class ObstacleGrid{
      * @param grid
      */
     private addSnakeToGrid(grid: number[][], currentTime: number, t: number, snake: Battlesnake){
-        let timeDiff : number = t - currentTime;
+        let timeDiff : number = (t - currentTime); // DONT TRAIT END OF TAIL AS OBSTACLE
         let snakeLengthToConsider = snake.body.length - timeDiff;
 
         if(snakeLengthToConsider > 0){

@@ -224,7 +224,7 @@ function stayAlive(state: AgentState): Action<AgentAction> {
  */
 function pickRandomPosition(state: AgentState): Vector2Int {
     const { width, height } = state.gameState.board;
-    const center = new Vector2Int(width / 2, height / 2);
+    const center = new Vector2Int(Math.floor(width / 2), Math.floor(height / 2));
 
     // Create an array of all positions with their weights
     const positions: { position: Vector2Int; weight: number }[] = [];
@@ -249,7 +249,7 @@ function pickRandomPosition(state: AgentState): Vector2Int {
     for (const pos of positions) {
         accumulatedWeight += (1 / pos.weight);
         if (randomValue < accumulatedWeight) {
-            return pos.position;
+            return new Vector2Int(Math.floor(pos.position.x), Math.floor(pos.position.y));
         }
     }
 

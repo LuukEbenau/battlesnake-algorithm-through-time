@@ -133,10 +133,46 @@ function stayAlive(state: AgentState): Action<AgentAction> {
     return fail();
 }
 
+/**
+ * I made (together with gpt bc im lazy) this function which picks a point with a bias towards points in the center. I assume that the center is usually a safer place to go, so this would be the best scenario.
+ * @param state
+ * @returns
+ */
 function pickRandomPosition(state: AgentState): Vector2Int {
     const { width, height } = state.gameState.board;
+    const center = new Vector2Int(width / 2, height / 2);
+
+    // Create an array of all positions with their weights
+    const positions: { position: Vector2Int; weight: number }[] = [];
+
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+            const position = new Vector2Int(x, y);
+            const distance = position.distance(center);
+            const weight = Math.log2(distance + 1); // Using log2 for weighting, +1 to avoid log(0)
+            positions.push({ position, weight });
+        }
+    }
+
+    // Calculate the total weight
+    const totalWeight = positions.reduce((sum, pos) => sum + (1 / pos.weight), 0);
+
+    // Generate a random number between 0 and totalWeight
+    const randomValue = Math.random() * totalWeight;
+
+    // Pick a position based on the random value and weights
+    let accumulatedWeight = 0;
+    for (const pos of positions) {
+        accumulatedWeight += (1 / pos.weight);
+        if (randomValue < accumulatedWeight) {
+            return pos.position;
+        }
+    }
+
+    // Fallback in case something goes wrong
     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
 }
+
 
 function stayAliveImproved(state: AgentState): Action<AgentAction> {
     // const agentLength = state.gameState.you.body.length;

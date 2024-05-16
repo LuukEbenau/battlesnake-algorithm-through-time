@@ -4,6 +4,7 @@ import { Vector2Int } from "../util/vectors";
 export class TeamCommunicator {
     private readonly teamIds = new Set<string>();
 
+    private readonly players = new Map<string, Vector2Int[]>();
     private foods: Vector2Int[] = [];
 
     private foodToOwner = new Map<string, string>();
@@ -12,8 +13,18 @@ export class TeamCommunicator {
     private agentPaths = new Map<string, Vector2Int[]>();
     private nextAgentPaths = new Map<string, Vector2Int[]>();
 
+    private enemyToOwner = new Map<string, string>();
+    private nextEnemyToOwner = new Map<string, string>();
+
     tick(gameState: GameState): void {
         this.teamIds.add(gameState.you.id);
+
+        this.players.clear();
+
+        for (const snake of gameState.board.snakes) {
+            this.players.set(snake.id, snake.body.map(b => Vector2Int.fromCoord(b)));
+        }
+
         this.foods = gameState.board.food.map(f => Vector2Int.fromCoord(f));
 
         this.foodToOwner = this.nextFoodToOwner;
@@ -21,6 +32,9 @@ export class TeamCommunicator {
 
         this.agentPaths = this.nextAgentPaths;
         this.nextAgentPaths = new Map();
+
+        this.enemyToOwner = this.nextEnemyToOwner;
+        this.nextEnemyToOwner = new Map();
     }
     *iterateAvailableFoods(agentId: string): IterableIterator<Vector2Int> {
         for (const food of this.foods) {
@@ -60,5 +74,31 @@ export class TeamCommunicator {
     }
     getTeamMembers(agentId: string): string[] {
         return [...this.iterateTeamMembers(agentId)];
+    }
+    *iterateTargetableEnemies(agentId: string, distance: (agentPos: Vector2Int[], enemyPos: Vector2Int[]) => number): IterableIterator<[string, Vector2Int[]]> {
+        const nextEnemyId = this.nextEnemyToOwner.get(agentId);
+        if (nextEnemyId !== undefined) {
+            return nextEnemyId;
+        }
+
+        const enemyId = this.nextEnemyToOwner.get(agentId);
+        if (enemyId !== undefined) {
+            return enemyId;
+        }
+
+        const players = [...this.players.entries()]
+            .sort(([aId, aBody], [bId, bBody]) => distance(aBody, bBody));
+
+        for (const [playerId, body] of players) {
+            const ownerId = this.enemyToOwner.get(playerId);
+            const nextOwnerId = this.nextEnemyToOwner.get(playerId);
+
+            if ((ownerId === undefined || ownerId === agentId) && (nextOwnerId === undefined || nextOwnerId === ownerId)) {
+                yield [playerId, body];
+            }
+        }
+    }
+    getTargetableEnemies(agentId: string, distance: (agentPos: Vector2Int[], enemyPos: Vector2Int[]) => number): [string, Vector2Int[]][] {
+        return [...this.iterateTargetableEnemies(agentId, distance)];
     }
 }

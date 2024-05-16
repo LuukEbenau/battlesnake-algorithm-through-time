@@ -28,6 +28,10 @@ export class Vector2Int {
 		return new Vector2Int(this.x + v2.x, this.y + v2.y); // dont change the instance, since this will give sideeffects
 	}
 
+    public sub(v2: Vector2Int): Vector2Int {
+        return new Vector2Int(this.x - v2.x, this.y - v2.y);
+    }
+
     public toJSONString() {
         return JSON.stringify({ x: this.x, y: this.y })
     }

@@ -76,41 +76,41 @@ function cutoffEnemy(): Action<AgentAction> {
     return fail();
 }
 
-// function pickRandomPosition(state: AgentState): Vector2Int {
-//     const { width, height } = state.gameState.board;
-//     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
-// }
+//// function pickRandomPosition(state: AgentState): Vector2Int {
+////     const { width, height } = state.gameState.board;
+////     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
+//// }
 
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
-    // const requiredPathLength = agentLength + 1;
+    //// const requiredPathLength = agentLength + 1;
 
     let path: Vector2Int[] = [];
 
-    // if (escape) {
-    //     let i = 0;
-    //     let _timeout = 0;
-    //     while (i < config.escapeRetryCount){
-    //         const randomPosition = pickRandomPosition(state);
-    //         let gridLayer = state.obstacleMap.getGridAtTime(0);
-    //         if(_timeout > 100) break; //fail safe, should never trigger. but in very lategame this could theoretically be possible
-    //         if(gridLayer[randomPosition.x][randomPosition.y]>1.35){
-    //             _timeout++;
-    //             continue; //find a position which is not blocked
-    //         }
+    //// if (escape) {
+    ////     let i = 0;
+    ////     let _timeout = 0;
+    ////     while (i < config.escapeRetryCount){
+    ////         const randomPosition = pickRandomPosition(state);
+    ////         let gridLayer = state.obstacleMap.getGridAtTime(0);
+    ////         if(_timeout > 100) break; //fail safe, should never trigger. but in very lategame this could theoretically be possible
+    ////         if(gridLayer[randomPosition.x][randomPosition.y]>1.35){
+    ////             _timeout++;
+    ////             continue; //find a position which is not blocked
+    ////         }
 
-    //         i++;
+    ////         i++;
 
-    //         path = state.aStar.findPath(state.currentPosition, target, randomPosition);
+    ////         path = state.aStar.findPath(state.currentPosition, target, randomPosition);
 
-    //         if (path.length >= requiredPathLength) {
-    //             break;
-    //         }
+    ////         if (path.length >= requiredPathLength) {
+    ////             break;
+    ////         }
 
-    //     }
-    // } else {
+    ////     }
+    //// } else {
     path = state.aStar.findPath(state.currentPosition, target);
-    // }
+    //// }
 
     if (path.length < 2) {
         return fail();

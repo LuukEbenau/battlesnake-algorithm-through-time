@@ -9,7 +9,7 @@ export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
     private readonly friendlySnakePathCollisionPenalty = 200;
     private readonly snakeOppositionPenalty = 100
-    private readonly potentialEnemyPositionCoefficientAmplifier = 6; // probably lower?
+    private readonly potentialEnemyPositionCoefficientAmplifier = 10; // probably lower?
 
     public width = 0;
     public height = 0;

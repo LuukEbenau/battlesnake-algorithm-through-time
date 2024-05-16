@@ -140,8 +140,6 @@ function performCutoff(state: AgentState, config: AgentConfig, enemyBody: Vector
 }
 
 function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction> {
-    let enemy: [string, Vector2Int[]];
-
     const targets = state.teamCommunicator.iterateTargetableEnemies(
         state.agentId,
         (a, b) => a[0].distance(b[0])
@@ -157,6 +155,7 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
         const action = registerPath(state, config, cutoffPath);
 
         if (action.status) {
+            console.log("cutoff!!!");
             return action;
         }
     }

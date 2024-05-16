@@ -6,7 +6,7 @@ import { GridAStarNode } from "./providers/grid-astar";
 
 export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId> implements AStar<TData> {
 
-    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private state: GameState, private maxIterationCount = Number.MAX_VALUE) {
+    constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private state: GameState, private maxIterationCount = 1000) {
     }
 
     findPath(start: TData, ...goals: TData[]): TData[] {
@@ -14,6 +14,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
             return [];
         }
         let goal = goals[0]; // we only want to consider one goal in our case.
+        if(goals.length>1 && loglevel <= LOGLEVEL.WARNING) console.warn("more than 1 goal is supplied. not supported by curreny A* algorithm, subsequent goals are ignored.")
 
         this.provider.prepare(start, goals);
 

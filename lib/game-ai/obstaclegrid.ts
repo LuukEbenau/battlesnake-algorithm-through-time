@@ -77,10 +77,9 @@ export class ObstacleGrid{
                     this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
                 }
                 else{
-
+                    this.addPotentialEnemyPositions(gridLayer, t, snake);
                 }
                 // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
-                this.addPotentialEnemyPositions(gridLayer, t, snake);
                 this.addEnemyOppositionPositions(gridLayer, t, this.state.you, snake);
             }
             else{

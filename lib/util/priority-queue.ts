@@ -1,5 +1,5 @@
 export class PriorityQueue<T> {
-    private readonly items: [T, number][] = [];
+    private items: [T, number][] = [];
     private isSorted = true;
 
     isEmpty(): boolean {
@@ -26,5 +26,8 @@ export class PriorityQueue<T> {
 
 
         return item[0];
+    }
+    clear(){
+        this.items = [];
     }
 }

@@ -5,9 +5,10 @@ import { Vector2Int, Vector3Int } from "../../util/vectors";
 import { GridAStarNode, GridAStarProvider } from "./grid-astar";
 
 export class GameAStarProvider extends GridAStarProvider {
+
     /**format is [t][x][y] */
-	private obstacleMap!: ObstacleGrid;
     private _maxHeuristicValue : number = 10000; // maximum heuristic value possible before a node is not searchable.
+    obstacleMap!: ObstacleGrid;
 
     constructor(private readonly teamCommunicator: TeamCommunicator) {
         super();

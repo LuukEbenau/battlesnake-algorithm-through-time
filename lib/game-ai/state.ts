@@ -2,6 +2,7 @@ import { GameState } from "../../types";
 import { AStar } from "../path-finding";
 import { GameAStarProvider } from "../path-finding/providers/game-astar";
 import { StandardAStar } from "../path-finding/standard-astar";
+import { StandardAStarWithEscape } from "../path-finding/standard-astar-with-escape";
 import { Vector2Int } from "../util/vectors";
 import { AgentState } from "./agent";
 import { ObstacleGrid } from "./obstaclegrid";
@@ -20,7 +21,7 @@ export class GameAgentState implements AgentState {
     constructor(config: GameAgentStateConfig, private state: GameState, public readonly teamCommunicator: TeamCommunicator) {
         this.provider = new GameAStarProvider(teamCommunicator);
         this.obstacleMap = new ObstacleGrid(state, teamCommunicator);
-        this.aStar = new StandardAStar(this.provider, config.aStarMaxIterationCount);
+        this.aStar = new StandardAStarWithEscape(this.provider, state, config.aStarMaxIterationCount);
     }
 
     get agentId(): string {

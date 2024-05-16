@@ -37,6 +37,8 @@ const config: AgentManagerConfig = {
     wellFedHealth: 51,
     killLength: 10,
     escapeRetryCount: 5,
+    cutoffDistance: 2,
+    maxAgentsPerformingCutoff: 1,
 };
 let agentManager = new AgentManager(config);
 

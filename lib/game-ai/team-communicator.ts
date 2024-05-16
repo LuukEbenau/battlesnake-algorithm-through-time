@@ -16,6 +16,9 @@ export class TeamCommunicator {
     private enemyToOwner = new Map<string, string>();
     private nextEnemyToOwner = new Map<string, string>();
 
+    constructor(private readonly maxCutoffAgents: number) {
+    }
+
     tick(gameState: GameState): void {
         this.teamIds.add(gameState.you.id);
 
@@ -78,12 +81,28 @@ export class TeamCommunicator {
     *iterateTargetableEnemies(agentId: string, distance: (agentPos: Vector2Int[], enemyPos: Vector2Int[]) => number): IterableIterator<[string, Vector2Int[]]> {
         const nextEnemyId = this.nextEnemyToOwner.get(agentId);
         if (nextEnemyId !== undefined) {
-            return nextEnemyId;
+            const body = this.players.get(nextEnemyId);
+
+            if (body === undefined) {
+                throw new Error("should never happen")
+            }
+
+            yield [nextEnemyId, body];
+        }
+
+        if (this.nextEnemyToOwner.size >= this.maxCutoffAgents || this.enemyToOwner.size >= this.maxCutoffAgents) {
+            return;
         }
 
         const enemyId = this.nextEnemyToOwner.get(agentId);
         if (enemyId !== undefined) {
-            return enemyId;
+            const body = this.players.get(enemyId);
+
+            if (body === undefined) {
+                throw new Error("should never happen")
+            }
+
+            yield [enemyId, body];
         }
 
         const players = [...this.players.entries()]
@@ -92,6 +111,10 @@ export class TeamCommunicator {
         for (const [playerId, body] of players) {
             const ownerId = this.enemyToOwner.get(playerId);
             const nextOwnerId = this.nextEnemyToOwner.get(playerId);
+
+            if (playerId === enemyId || playerId === nextEnemyId) {
+                continue;
+            }
 
             if ((ownerId === undefined || ownerId === agentId) && (nextOwnerId === undefined || nextOwnerId === ownerId)) {
                 yield [playerId, body];

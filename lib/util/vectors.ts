@@ -47,7 +47,7 @@ export class Vector2Int {
  * The x and y represent the grid, the z axis represents the time dimension
  */
 export class Vector3Int extends Vector2Int{
-	public constructor(x:number, y:number,public readonly z:number){
+	public constructor(x:number, y:number,public z:number){
 		super(x,y)
 	}
 

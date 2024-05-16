@@ -3,7 +3,7 @@ import { getDirections } from "../../util/grid";
 import { Vector3Int, Vector2Int } from "../../util/vectors";
 
 export class GridAStarNode {
-    constructor(public readonly position: Vector3Int, public readonly direction: Vector3Int, public readonly prevNode : GridAStarNode|undefined) {}
+    constructor(public readonly position: Vector3Int, public readonly direction: Vector3Int, public prevNode : GridAStarNode|undefined = undefined) {}
 }
 
 export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridAStarNode, string> {
@@ -26,7 +26,7 @@ export class GridAStarProvider extends AbstractAStarProvider<Vector2Int, GridASt
 	override *getNeighbors(node: GridAStarNode): IterableIterator<GridAStarNode> {
 		for (const directionVector of this.directionVectors) {
 			const cell = node.position.add(directionVector);
-            yield new GridAStarNode(cell, directionVector, node);
+            yield new GridAStarNode(cell, directionVector, node); //NOTE: this node is gonna be overridden, so shouldnt even be needed here
 		}
 	}
 	override inMap(data: Vector2Int): GridAStarNode {

@@ -21,8 +21,8 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
         const goalNode = this.provider.inMap(goal);
         let startNode = this.provider.inMap(start);
 
-        const openSet = new PriorityQueue<TNodeId>();
-        const nodeStore = new Map<TNodeId, TNode>();
+
+        let nodeStore = new Map<TNodeId, TNode>();
 
         const cameFrom = new Map<TNodeId, TNodeId>();
 
@@ -32,8 +32,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
         nodeStore.set(goalNodeId, goalNode);
 
 
-        const path = this.findSinglePath(startNodeId, goalNodeId, openSet, nodeStore, cameFrom);
-
+        const path = this.findSinglePath(startNodeId, goalNodeId, nodeStore, cameFrom);
         if (path.length === 0) {
             return [];
         }
@@ -41,6 +40,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
         //Now, we need to check if we can still escape from this point forward. To do this, we can simply clear the openset to only contain the surrounding nodes, and see if it can survive.
         let lastPos = path[path.length-1];
 
+        // nodeStore.clear();
 
         //now, try to see if the snake can survive for at least <snakesize*1.25> amount of timesteps
         let lastTimeStep = lastPos.position.z;
@@ -50,8 +50,12 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
 
         if(loglevel <= LOGLEVEL.INFO) console.log(`Trying to find an escape path from timestep ${lastTimeStep} for ${timestepsToSurvive} timesteps`);
 
+        nodeStore = new Map<TNodeId, TNode>();
         nodeStore.set(this.provider.getId(lastPos), lastPos); // if i dont do it it crashes?
-        let escapePathFound : boolean = this.findIfEscapePathIsAvailable(this.provider.getId(lastPos), timestepsToSurvive,openSet,nodeStore,cameFrom);
+
+        //TODO: PROBLEM WITH ESCAPE PATH: right now it only checks one entrance of the 4 possible entrances to get to the goal node. What we would want to do is consider all 4 possible entrance paths. This way, it will not block its escape path.
+
+        let escapePathFound : boolean = this.findIfEscapePathIsAvailable(this.provider.getId(lastPos), timestepsToSurvive, nodeStore, cameFrom);
 
         if(!escapePathFound){
             if(loglevel <= LOGLEVEL.INFO) console.log("No escape path found after gathering food, finding alternative routes...");
@@ -65,15 +69,12 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
         return outPath;
     }
 
-    private findIfEscapePathIsAvailable(startNodeId: TNodeId, goalTimeStep:number, openSet: PriorityQueue<TNodeId>, nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>) : boolean {
-
+    private findIfEscapePathIsAvailable(startNodeId: TNodeId, goalTimeStep:number, nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>) : boolean {
+        const openSet = new PriorityQueue<TNodeId>();
         let startNode = this.safeGet(nodeStore, startNodeId);
-        //repopulate with the neighbors of the goal node
-
         const startFScore = -1;
 
         // to encourage breath first searching, it takes elements with highest distance first
-
         openSet.clear();
         openSet.enqueue(startNodeId, 0);
 
@@ -122,13 +123,14 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
     }
 
 
-    private findSinglePath(startNodeId: TNodeId, goalNodeId: TNodeId, openSet: PriorityQueue<TNodeId>, nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>): TNode[] {
-        let startNode = this.safeGet(nodeStore,startNodeId);
-        let goalNode = this.safeGet(nodeStore,goalNodeId);
+    private findSinglePath(startNodeId: TNodeId, goalNodeId: TNodeId, nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>): TNode[] {
+        const openSet = new PriorityQueue<TNodeId>();
+        let startNode = this.safeGet(nodeStore, startNodeId);
+        let goalNode = this.safeGet(nodeStore, goalNodeId);
 
-        if (this.provider.isGoal(startNode, goalNode, startNodeId, goalNodeId)) {
-            return [startNode, goalNode];
-        }
+        // if (this.provider.isGoal(startNode, goalNode, startNodeId, goalNodeId)) {
+        //     return [startNode, goalNode];
+        // }
 
         const gScore = new Map<TNodeId, number>();
         gScore.set(startNodeId, 0);
@@ -149,6 +151,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
             const current = this.safeGet(nodeStore, currentId);
 
             if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {
+                goalNode.position.z = current.position.z; // its kinda hacky, but i put the time step in here once the goal is found. for some reason the nodelist otherwise doesnt update
                 const path = this.reconstructPath(nodeStore, cameFrom, goalNode, currentId);
                 this.provider.clear();
 
@@ -166,6 +169,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
                 if (neighborGScore === undefined || tentativeGScore < neighborGScore) {
                     nodeStore.set(neighborId, neighbor);
 
+                    neighbor.prevNode = current; // NOTE: i now set it in here instead of in the provider. this seems cleaner, since the cameFrom is also set here. would be even better to have the cameFrom function in here, but this is good enough
                     cameFrom.set(neighborId, currentId);
                     gScore.set(neighborId, tentativeGScore);
 

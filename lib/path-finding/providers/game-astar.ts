@@ -71,19 +71,14 @@ export class GameAStarProvider extends GridAStarProvider {
         return false;
     }
 
-    private getCoefficient(curNode:GridAStarNode, nextNode: GridAStarNode):number{
+    private getCoefficient(nextNode: GridAStarNode):number{
         let coefficient = this.obstacleMap.getGridAtTime(nextNode.position.z)[nextNode.position.x][nextNode.position.y];
-
-        // let nextNodeCoefficient = this._getAvoidPreviousPathCoefficient(curNode,nextNode)
-        // if(nextNodeCoefficient>0){
-        //     coefficient = nextNodeCoefficient;
-        // }
 
         return coefficient;
     }
 
     override distance(a: GridAStarNode, b: GridAStarNode): number {
-        return this.getCoefficient(a,b) * super.distance(a, b);
+        return this.getCoefficient(b) * super.distance(a, b);
     }
 
 	private cellInsideBoundaries(cell: Vector2Int): boolean {
@@ -110,7 +105,7 @@ export class GameAStarProvider extends GridAStarProvider {
             const cell = neighbor.position;
             const direction = neighbor.direction;
 
-			if (this.cellInsideBoundaries(cell) && !this.NodeIsPartOfCurrentPath(node, neighbor) && this.getCoefficient(node,neighbor) < this._maxHeuristicValue // just a high number
+			if (this.cellInsideBoundaries(cell) && !this.NodeIsPartOfCurrentPath(node, neighbor) && this.getCoefficient(neighbor) < this._maxHeuristicValue // just a high number
                     && (noDirection || !oppositeDirection.equals(direction))) {
 				yield neighbor;
 			}

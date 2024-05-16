@@ -7,7 +7,6 @@ import { GameState } from "../../types";
 import { iterateDirections } from "../util/grid";
 import { TeamCommunicator } from "./team-communicator";
 import { LOGLEVEL, loglevel } from "../config";
-import { GameAgentState } from "./state";
 import { ObstacleGrid } from "./obstaclegrid";
 
 /**
@@ -76,41 +75,12 @@ function cutoffEnemy(): Action<AgentAction> {
     return fail();
 }
 
-//// function pickRandomPosition(state: AgentState): Vector2Int {
-////     const { width, height } = state.gameState.board;
-////     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
-//// }
-
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
-    //// const requiredPathLength = agentLength + 1;
 
     let path: Vector2Int[] = [];
 
-    //// if (escape) {
-    ////     let i = 0;
-    ////     let _timeout = 0;
-    ////     while (i < config.escapeRetryCount){
-    ////         const randomPosition = pickRandomPosition(state);
-    ////         let gridLayer = state.obstacleMap.getGridAtTime(0);
-    ////         if(_timeout > 100) break; //fail safe, should never trigger. but in very lategame this could theoretically be possible
-    ////         if(gridLayer[randomPosition.x][randomPosition.y]>1.35){
-    ////             _timeout++;
-    ////             continue; //find a position which is not blocked
-    ////         }
-
-    ////         i++;
-
-    ////         path = state.aStar.findPath(state.currentPosition, target, randomPosition);
-
-    ////         if (path.length >= requiredPathLength) {
-    ////             break;
-    ////         }
-
-    ////     }
-    //// } else {
     path = state.aStar.findPath(state.currentPosition, target);
-    //// }
 
     if (path.length < 2) {
         return fail();
@@ -130,6 +100,7 @@ function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
     const position = state.currentPosition;
     const agentId = state.agentId;
 
+    //NOTE: .getAvailableFoods replaced with getAllFoods for now for testing
     const sortedFoods = state.teamCommunicator.getAvailableFoods(agentId)
         .map(f => new Vector2Int(f.x, f.y))
         .map(f => ({ position: f, distance: position.distance(f) }))
@@ -150,7 +121,7 @@ function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
 
 function stayAlive(state: AgentState): Action<AgentAction> {
     const position = state.currentPosition;
-    if(loglevel <= LOGLEVEL.INFO) console.log("Initializing stayAlive sequence");
+    if(loglevel <= LOGLEVEL.DEBUG) console.log("Initializing stayAlive sequence");
     for (const direction of iterateDirections()) {
         const cell = position.add(direction);
 
@@ -160,6 +131,47 @@ function stayAlive(state: AgentState): Action<AgentAction> {
     }
 
     return fail();
+}
+
+function pickRandomPosition(state: AgentState): Vector2Int {
+    const { width, height } = state.gameState.board;
+    return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
+}
+
+function stayAliveImproved(state: AgentState): Action<AgentAction> {
+    // const agentLength = state.gameState.you.body.length;
+    // const requiredPathLength = agentLength + 1;
+    let escapeRetryCount = 10
+    let path: Vector2Int[] = [];
+
+    let i = 0;
+    let _timeout = 0;
+    while (i < escapeRetryCount){
+        const randomPosition = pickRandomPosition(state);
+        let gridLayer = state.obstacleMap.getGridAtTime(0);
+        if(_timeout > 100) break; //fail safe, should never trigger. but in very lategame this could theoretically be possible
+        if(gridLayer[randomPosition.x][randomPosition.y]>1.35){
+            _timeout++;
+            continue; //find a position which is not blocked
+        }
+
+        i++;
+
+        path = state.aStar.findPath(state.currentPosition, randomPosition);
+
+        if (path.length >= 2) {
+            break;
+        }
+    }
+
+    if (path.length < 2) {
+        return fail();
+    }
+
+    state.teamCommunicator.setAgentPath(state.agentId, path);
+
+    const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
+    return succeed(directionToAction(direction));
 }
 
 export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentAction> {
@@ -173,6 +185,7 @@ export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentActi
                 cutoffEnemy,
             ),
             eatFood,
+            stayAliveImproved,
             stayAlive,
         )
     );

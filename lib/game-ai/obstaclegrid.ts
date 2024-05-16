@@ -9,7 +9,7 @@ export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
     private readonly friendlySnakePathCollisionPenalty = 200;
     private readonly snakeOppositionPenalty = 100
-    private readonly potentialEnemyPositionCoefficientAmplifier = 15; // probably lower?
+    private readonly potentialEnemyPositionCoefficientAmplifier = 6; // probably lower?
 
     public width = 0;
     public height = 0;
@@ -69,17 +69,18 @@ export class ObstacleGrid{
 
             //TODO: other friendly agents paths
 
-            let isFriendlyAgent:boolean = false;
+            // let isFriendlyAgent:boolean = false;
 
             if(!isSelf){
-                // const friendlyAgentPath : Vector2Int[] | undefined = this.teamCommunicator.getFriendlyAgentPath(snake.id);
-                // if(friendlyAgentPath){
-                //     this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
-                // }
-                // else{
-                    // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
-                    this.addPotentialEnemyPositions(gridLayer, t, snake);
-                // }
+                const friendlyAgentPath : Vector2Int[] | undefined = this.teamCommunicator.getFriendlyAgentPath(snake.id);
+                if(friendlyAgentPath){
+                    this.addFriendlyAgentPath(gridLayer, t, snake, friendlyAgentPath);
+                }
+                else{
+
+                }
+                // IF enemy snake, we also need to take into account potential positions of the snake head at a given time step.
+                this.addPotentialEnemyPositions(gridLayer, t, snake);
                 this.addEnemyOppositionPositions(gridLayer, t, this.state.you, snake);
             }
             else{
@@ -210,7 +211,8 @@ export class ObstacleGrid{
     }
 
     private addPotentialEnemyPositions(grid: number[][], t: number, snake: Battlesnake){
-        let potentialPositionsMap : Map<string,number> = this.computeProbabilities(snake.head, t, grid)
+        let potentialPositionsMap : Map<string,number> = this.calculatePotentialEnemyPositions(grid, t, snake)
+        // let potentialPositionsMap : Map<string,number> = this.computeProbabilities(snake.head, t, grid)
         for(let pair of potentialPositionsMap){
             let split = pair[0].split(',')
             let x = parseInt(split[0]);
@@ -261,72 +263,73 @@ export class ObstacleGrid{
 
         return probabilities;
     }
+
+    /**
+ * NOTE: this is old slow code for predicting enemy positions.
+     * Calculates the probability of the enemy snake to be at a certain cell at a certain moment. NOTE: if this algorithm turns out to be too slow, we can opt for a guassian distribution based approach
+     * @param grid
+     * @param t how many time steps from the current time at which the enemy snake is observed
+     * @param snake
+     * @returns Map containing the probability of the enemy head being at a certain cell at a certain time step in the future
+     */
+    private calculatePotentialEnemyPositions(grid: number[][], t: number, snake: Battlesnake): Map<string, number> {
+        let distanceToCheck = Math.min(t, 5);
+        let head = snake.head;
+        let queue: EnemyPositionSearchObject[] = [];
+        let probabilityMap = new Map<string, number>();
+
+        // Directions: right, left, down, up
+        const directions = [
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 }
+        ];
+
+        // Helper function to create a unique key for each position
+        const positionKey = (x: number, y: number): string => `${x},${y}`;
+
+        // Start BFS from the snake's head
+        queue.push({ position: head, steps: 0, probability: 1 });
+        probabilityMap.set(positionKey(head.x, head.y), 1);
+
+        while (queue.length > 0) {
+            let _data = queue.shift();
+            if (!_data) break;
+            let data = _data as EnemyPositionSearchObject
+
+            if (data.steps < distanceToCheck) {
+                let validMoves = 0;
+                let nextPositions: Coord[] = [];
+
+                // Calculate valid moves from the current position
+                directions.forEach(dir => {
+                    let newX = data.position.x + dir.dx;
+                    let newY = data.position.y + dir.dy;
+
+                    if (newX >= 0 && newX < grid[0].length && newY >= 0 && newY < grid.length) {
+                        validMoves++;
+                        nextPositions.push({ x: newX, y: newY });
+                    }
+                });
+
+                // Update probabilities for each valid move
+                nextPositions.forEach(pos => {
+                    let nextProbability = data.probability / validMoves;
+                    let key = positionKey(pos.x, pos.y);
+                    let currentProbability = probabilityMap.get(key) || 0;
+                    probabilityMap.set(key, currentProbability + nextProbability);
+                    queue.push({ position: pos, steps: data.steps + 1, probability: nextProbability });
+                });
+            }
+        }
+
+        return probabilityMap;
+    }
+
 }
 export interface EnemyPositionSearchObject{
     position: Coord;
     steps: number;
     probability: number;
 }
-
-/**
- * NOTE: this is old slow code for predicting enemy positions.
-    //  * Calculates the probability of the enemy snake to be at a certain cell at a certain moment. NOTE: if this algorithm turns out to be too slow, we can opt for a guassian distribution based approach
-    //  * @param grid
-    //  * @param t how many time steps from the current time at which the enemy snake is observed
-    //  * @param snake
-    //  * @returns Map containing the probability of the enemy head being at a certain cell at a certain time step in the future
-    //  */
-    // private calculatePotentialEnemyPositions(grid: number[][], t: number, snake: Battlesnake): Map<string, number> {
-    //     let distanceToCheck = Math.min(t, 5);
-    //     let head = snake.head;
-    //     let queue: EnemyPositionSearchObject[] = [];
-    //     let probabilityMap = new Map<string, number>();
-
-    //     // Directions: right, left, down, up
-    //     const directions = [
-    //         { dx: 1, dy: 0 },
-    //         { dx: -1, dy: 0 },
-    //         { dx: 0, dy: 1 },
-    //         { dx: 0, dy: -1 }
-    //     ];
-
-    //     // Helper function to create a unique key for each position
-    //     const positionKey = (x: number, y: number): string => `${x},${y}`;
-
-    //     // Start BFS from the snake's head
-    //     queue.push({ position: head, steps: 0, probability: 1 });
-    //     probabilityMap.set(positionKey(head.x, head.y), 1);
-
-    //     while (queue.length > 0) {
-    //         let _data = queue.shift();
-    //         if (!_data) break;
-    //         let data = _data as EnemyPositionSearchObject
-
-    //         if (data.steps < distanceToCheck) {
-    //             let validMoves = 0;
-    //             let nextPositions: Coord[] = [];
-
-    //             // Calculate valid moves from the current position
-    //             directions.forEach(dir => {
-    //                 let newX = data.position.x + dir.dx;
-    //                 let newY = data.position.y + dir.dy;
-
-    //                 if (newX >= 0 && newX < grid[0].length && newY >= 0 && newY < grid.length) {
-    //                     validMoves++;
-    //                     nextPositions.push({ x: newX, y: newY });
-    //                 }
-    //             });
-
-    //             // Update probabilities for each valid move
-    //             nextPositions.forEach(pos => {
-    //                 let nextProbability = data.probability / validMoves;
-    //                 let key = positionKey(pos.x, pos.y);
-    //                 let currentProbability = probabilityMap.get(key) || 0;
-    //                 probabilityMap.set(key, currentProbability + nextProbability);
-    //                 queue.push({ position: pos, steps: data.steps + 1, probability: nextProbability });
-    //             });
-    //         }
-    //     }
-
-    //     return probabilityMap;
-    // }

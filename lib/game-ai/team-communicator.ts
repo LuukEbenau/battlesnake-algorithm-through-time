@@ -28,6 +28,9 @@ export class TeamCommunicator {
             const foodOwnerId = this.foodToOwner.get(foodStr);
             const nextFoodOwnerId = this.nextFoodToOwner.get(foodStr);
 
+            // Food is not claimed OR food is claimed by me
+            //  No other agent has already claimed the food OR i claimed the food.
+            // TODO: right now the food is given to the agent which is first to claim the food. We would like it to be given to the closest agent instead when in doubt?
             if ((foodOwnerId === undefined || foodOwnerId === agentId) && (nextFoodOwnerId === undefined || nextFoodOwnerId === agentId)) {
                 yield food;
             }
@@ -35,6 +38,9 @@ export class TeamCommunicator {
     }
     getAvailableFoods(agentId: string): Vector2Int[] {
         return [...this.iterateAvailableFoods(agentId)];
+    }
+    getAllFoods(): Vector2Int[] {
+        return this.foods;
     }
     claimFood(agentId: string, food: Vector2Int) {
         this.nextFoodToOwner.set(food.toJSONString(), agentId);

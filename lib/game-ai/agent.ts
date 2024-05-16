@@ -78,6 +78,26 @@ function pickRandomPosition(state: AgentState): Vector2Int {
     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
 }
 
+// function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
+//     const agentLength = state.gameState.you.body.length;
+//     const requiredPathLength = 2 * agentLength;
+
+//     let path: Vector2Int[] = [];
+
+//     if (escape) {
+//         for (let i = 0; i < config.escapeRetryCount; i++) {
+//             const randomPosition = pickRandomPosition(state);
+
+//             path = state.aStar.findPath(state.currentPosition, target, randomPosition);
+
+//             if (path.length >= requiredPathLength) {
+//                 break;
+//             }
+//         }
+//     } else {
+//         path = state.aStar.findPath(state.currentPosition, target);
+//     }
+// }
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
     const requiredPathLength = 2 * agentLength;
@@ -97,44 +117,6 @@ function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int
     } else {
         path = state.aStar.findPath(state.currentPosition, target);
     }
-function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
-    return true;
-}
-
-function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
-    return true;
-    // const agentLength = state.gameState.you.body.length;
-    // const timeGrid = generateTimeGrid(state, path);
-
-    // const pathLen = path.length;
-    // let currentTime = 1;
-
-    // for (let i = 1; i < pathLen; i++) {
-    //     const success = nextMove(timeGrid, currentTime, path[i], agentLength);
-
-    //     if (!success) {
-    //         throw new Error("this should never happen");
-    //     }
-
-    //     currentTime++;
-    // }
-
-    // const considerTime = currentTime + agentLength;
-
-    // for (let i = currentTime; i < considerTime; i++) {
-    //     const success = findBestNextMove(timeGrid, currentTime, agentLength);
-
-    //     if (!success) {
-    //         return false;
-    //     }
-    // }
-
-    // return true;
-}
-
-function registerMove(state: AgentState, target: Vector2Int): Action<AgentAction> {
-    const agentId = state.agentId;
-    const path = state.aStar.findPath(state.currentPosition, target);
 
     if (path.length < 2) {
         return fail();
@@ -145,6 +127,44 @@ function registerMove(state: AgentState, target: Vector2Int): Action<AgentAction
     const direction = new Vector2Int(path[1].x - path[0].x, path[1].y - path[0].y);
     return succeed(directionToAction(direction));
 }
+
+
+function findBestNextMove(timeGrid: number[][], currentTime: number, currentAgentLength: number): boolean {
+    return true;
+}
+
+// function canEscapeAfterwards(state: AgentState, path: Vector2Int[]): boolean {
+//     // return true;
+//     const agentLength = state.gameState.you.body.length;
+//     const timeGrid = generateTimeGrid(state, path);
+
+//     const pathLen = path.length;
+//     let currentTime = 1;
+
+//     for (let i = 1; i < pathLen; i++) {
+//         const success = nextMove(timeGrid, currentTime, path[i], agentLength);
+
+//         if (!success) {
+//             throw new Error("this should never happen");
+//         }
+
+//         currentTime++;
+//     }
+
+//     const considerTime = currentTime + agentLength;
+
+//     for (let i = currentTime; i < considerTime; i++) {
+//         const success = findBestNextMove(timeGrid, currentTime, agentLength);
+
+//         if (!success) {
+//             return false;
+//         }
+//     }
+
+//     return true;
+// }
+
+
 
 function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
     const position = state.currentPosition;

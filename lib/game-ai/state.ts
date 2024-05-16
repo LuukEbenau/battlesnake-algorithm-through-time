@@ -13,7 +13,7 @@ export interface GameAgentStateConfig {
 
 export class GameAgentState implements AgentState {
     private readonly provider: GameAStarProvider;
-    private readonly obstacleMap: ObstacleGrid;
+    public readonly obstacleMap: ObstacleGrid;
 
     readonly aStar: AStar<Vector2Int>;
 

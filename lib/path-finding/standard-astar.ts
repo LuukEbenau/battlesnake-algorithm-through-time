@@ -5,22 +5,42 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
 
     constructor(private readonly provider: AStarProvider<TData, TNode, TNodeId>, private maxIterationCount = Number.MAX_VALUE) {
     }
-    findPath(start: TData, goal: TData): TData[] {
-        let iterationCount = 0;
 
-        this.provider.prepare(start, goal);
+    findPath(start: TData, ...goals: TData[]): TData[] {
+        if (goals.length === 0) {
+            return [];
+        }
 
-        const startNode = this.provider.inMapStart(start, goal);
-        const goalNode = this.provider.inMapGoal(start, goal);
+        this.provider.prepare(start, goals);
 
+        let currentStartNode = this.provider.inMap(start);
+        const path = [currentStartNode];
+
+        for (const currentGoal of goals) {
+            const currentGoalNode = this.provider.inMap(currentGoal);
+            const currentPath = this.findSinglePath(currentStartNode, currentGoalNode);
+
+            if (currentPath.length === 0) {
+                return [];
+            }
+
+            path.push(...currentPath.filter((_, i) => i > 0));
+            currentStartNode = currentPath[currentPath.length - 1];
+        }
+
+        const outPath = path.map(node => this.provider.outMap(node));
+
+        this.provider.clear();
+
+        return outPath;
+    }
+
+    private findSinglePath(startNode: TNode, goalNode: TNode): TNode[] {
         const startNodeId = this.provider.getId(startNode);
         const goalNodeId = this.provider.getId(goalNode);
 
         if (this.provider.isGoal(startNode, goalNode, startNodeId, goalNodeId)) {
-            return [
-                this.provider.outMapStart(startNode, start, goal),
-                this.provider.outMapGoal(goalNode, start, goal),
-            ];
+            return [startNode, goalNode];
         }
 
         const nodeStore = new Map<TNodeId, TNode>();
@@ -37,6 +57,8 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
         const startFScore = this.provider.heuristic(startNode, goalNode);
         openSet.enqueue(startNodeId, startFScore);
 
+        let iterationCount = 0;
+
         while (!openSet.isEmpty()) {
             const currentId = openSet.dequeue();
 
@@ -48,7 +70,7 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
             const current = this.safeGet(nodeStore, currentId);
 
             if (this.provider.isGoal(current, goalNode, currentId, goalNodeId)) {
-                const path = this.reconstructPath(nodeStore, cameFrom, startNode, goalNode, currentId, start, goal);
+                const path = this.reconstructPath(nodeStore, cameFrom, goalNode, currentId);
                 this.provider.clear();
 
                 return path;
@@ -74,13 +96,12 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
             }
         }
 
-        this.provider.clear();
         return [];
     }
 
-    private reconstructPath(nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>, startNode: TNode, goalNode: TNode, currentGoalNodeId: TNodeId, start: TData, goal: TData): TData[] {
-        const totalPath: TData[] = [];
-        totalPath.push(this.provider.outMapGoal(goalNode, start, goal));
+    private reconstructPath(nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>, goalNode: TNode, currentGoalNodeId: TNodeId): TNode[] {
+        const totalPath: TNode[] = [];
+        totalPath.push(goalNode);
 
         let previousId = currentGoalNodeId;
 
@@ -88,13 +109,11 @@ export class StandardAStar<TData, TNode, TNodeId> implements AStar<TData> {
             const currentId = this.safeGet(cameFrom, previousId);
             const current = this.safeGet(nodeStore, currentId);
 
-            totalPath.push(this.provider.outMap(current, start, goal));
+            totalPath.push(current);
             previousId = currentId;
         }
 
         totalPath.reverse();
-        totalPath[0] = this.provider.outMapStart(startNode, start, goal);
-
         return totalPath;
     }
 

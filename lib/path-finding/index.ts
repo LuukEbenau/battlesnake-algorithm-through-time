@@ -1,9 +1,9 @@
 export interface AStar<T> {
-    findPath(start: T, goal: T): T[];
+    findPath(start: T, ...goals: T[]): T[];
 }
 
 export interface AStarProvider<TData, TNode, TNodeId> {
-    prepare(start: TData, goal: TData): void;
+    prepare(start: TData, goals: TData[]): void;
 
     clear(): void;
 
@@ -17,15 +17,9 @@ export interface AStarProvider<TData, TNode, TNodeId> {
 
     getNeighbors(node: TNode): IterableIterator<TNode>;
 
-    inMapStart(start: TData, goal: TData): TNode;
+    inMap(data: TData): TNode;
 
-    inMapGoal(start: TData, goal: TData): TNode;
-
-    outMap(node: TNode, start: TData, goal: TData): TData;
-
-    outMapStart(node: TNode, start: TData, goal: TData): TData;
-
-    outMapGoal(node: TNode, start: TData, goal: TData): TData;
+    outMap(node: TNode): TData;
 }
 
 export abstract class AbstractAStarProvider<TData, TNode, TNodeId> implements AStarProvider<TData, TNode, TNodeId> {
@@ -42,14 +36,7 @@ export abstract class AbstractAStarProvider<TData, TNode, TNodeId> implements AS
     }
     abstract getId(node: TNode): TNodeId;
     abstract getNeighbors(node: TNode): IterableIterator<TNode>;
-    abstract inMapStart(start: TData, goal: TData): TNode;
-    abstract inMapGoal(start: TData, goal: TData): TNode;
-    abstract outMap(data: TNode, start: TData, goal: TData): TData;
-    outMapStart(node: TNode, start: TData, goal: TData): TData {
-        return start;
-    }
-    outMapGoal(node: TNode, start: TData, goal: TData): TData {
-        return goal;
-    }
+    abstract inMap(data: TData): TNode;
+    abstract outMap(node: TNode): TData;
 
 }

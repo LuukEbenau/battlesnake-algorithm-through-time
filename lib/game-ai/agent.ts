@@ -76,14 +76,14 @@ function cutoffEnemy(): Action<AgentAction> {
     return fail();
 }
 
-function pickRandomPosition(state: AgentState): Vector2Int {
-    const { width, height } = state.gameState.board;
-    return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
-}
+// function pickRandomPosition(state: AgentState): Vector2Int {
+//     const { width, height } = state.gameState.board;
+//     return new Vector2Int(Math.floor(Math.random() * width), Math.floor(Math.random() * height));
+// }
 
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int, escape = true): Action<AgentAction> {
     const agentLength = state.gameState.you.body.length;
-    const requiredPathLength = agentLength + 1;
+    // const requiredPathLength = agentLength + 1;
 
     let path: Vector2Int[] = [];
 

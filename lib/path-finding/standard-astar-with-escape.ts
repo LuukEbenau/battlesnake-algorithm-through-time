@@ -1,6 +1,6 @@
 import { AStar, AStarProvider } from ".";
 import { GameState } from "../../types";
-import { LOGLEVEL, loglevel } from "../config";
+import { LOGLEVEL, logInfo, loglevel } from "../config";
 import { PriorityQueue } from "../util/priority-queue";
 import { GridAStarNode } from "./providers/grid-astar";
 
@@ -14,7 +14,7 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
             return [];
         }
         let goal = goals[0]; // we only want to consider one goal in our case.
-        if(goals.length>1 && loglevel <= LOGLEVEL.WARNING) console.warn("more than 1 goal is supplied. not supported by curreny A* algorithm, subsequent goals are ignored.")
+        if(goals.length > 1 && loglevel <= LOGLEVEL.WARNING) console.warn("more than 1 goal is supplied. not supported by curreny A* algorithm, subsequent goals are ignored.")
 
         this.provider.prepare(start, goals);
 
@@ -37,10 +37,12 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
             return [];
         }
 
+
         //Now, we need to check if we can still escape from this point forward. To do this, we can simply clear the openset to only contain the surrounding nodes, and see if it can survive.
         let lastPos = path[path.length-1];
 
-        // nodeStore.clear();
+        // lastPos.position
+        this.state.you.body = [lastPos.position, ...this.state.you.body]; //CHECKME: i think this will kind of fix the fact that eating food will make the snake 1 tile longer. but idk about sideeffects.
 
         //now, try to see if the snake can survive for at least <snakesize*1.25> amount of timesteps
         let lastTimeStep = lastPos.position.z;
@@ -48,17 +50,19 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
 
         let timestepsToSurvive = bodyLength;
 
-        if(loglevel <= LOGLEVEL.INFO) console.log(`Turn ${this.state.turn}: Trying to find an escape path from timestep ${lastTimeStep} for ${bodyLength} timesteps`);
+        logInfo(`Turn ${this.state.turn}: Trying to find an escape path from timestep ${lastTimeStep} for ${bodyLength} timesteps`);
 
         nodeStore = new Map<TNodeId, TNode>();
         nodeStore.set(this.provider.getId(lastPos), lastPos); // if i dont do it it crashes?
 
         //TODO: PROBLEM WITH ESCAPE PATH: right now it only checks one entrance of the 4 possible entrances to get to the goal node. What we would want to do is consider all 4 possible entrance paths. This way, it will not block its escape path.
 
+        //TODO: when food is eaten, our snake is effectively 1 time extra long, but this is not yet taken into account. Therefore, it could happen that it walks into its own tail since it assumes the tail will disappear.
+
         let escapePathFound : boolean = this.findIfEscapePathIsAvailable(this.provider.getId(lastPos), lastTimeStep+timestepsToSurvive, nodeStore, cameFrom);
 
         if(!escapePathFound){
-            if(loglevel <= LOGLEVEL.INFO) console.log(`Turn ${this.state.turn}: No escape path found after gathering food, finding alternative routes...`);
+            logInfo(`Turn ${this.state.turn}: No escape path found after gathering food, finding alternative routes...`);
             return [];
         }
 

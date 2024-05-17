@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express"
+import { logInfo } from "./lib/config";
 
 export interface BattlesnakeHandlers {
   info: Function;
@@ -38,6 +39,6 @@ export default function runServer(handlers: BattlesnakeHandlers) {
   const port = parseInt(process.env.PORT || '8000');
 
   app.listen(port, host, () => {
-    console.log(`Running Battlesnake at http://${host}:${port}...`);
+    logInfo(`Running Battlesnake at http://${host}:${port}...`);
   });
 }

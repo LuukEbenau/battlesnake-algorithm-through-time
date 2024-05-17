@@ -6,8 +6,9 @@ import { Vector2, Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
 import { iterateDirections } from "../util/grid";
 import { TeamCommunicator } from "./team-communicator";
-import { LOGLEVEL, loglevel } from "../config";
+import { LOGLEVEL, logConsole, logDebug, logFun, logInfo, loglevel } from "../config";
 import { ObstacleGrid } from "./obstaclegrid";
+import { log } from "console";
 
 /**
  * Interface for agent state that is necessary to execute the behavior tree
@@ -156,7 +157,10 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
         const action = registerPath(state, config, cutoffPath);
 
         if (action.status) {
-            console.log("cutoff!!!");
+            logFun(LOGLEVEL.INFO, ()=>{
+                let cutoffTarget = cutoffPath[cutoffPath.length-1];
+                logInfo(`BEHAVIOUR: CUTOFF | goal: ${cutoffTarget.x}: ${cutoffTarget.y}`);
+            });
             return action;
         }
     }
@@ -196,6 +200,8 @@ function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
 
         if (action.status) {
             state.teamCommunicator.claimFood(agentId, food);
+
+            logInfo(`BEHAVIOUR: EATING FOOD | goal: ${food.x}:${food.y}`)
             return action;
         }
     }
@@ -205,11 +211,13 @@ function eatFood(state: AgentState, config: AgentConfig): Action<AgentAction> {
 
 function stayAlive(state: AgentState): Action<AgentAction> {
     const position = state.currentPosition;
-    if(loglevel <= LOGLEVEL.DEBUG) console.log("Initializing stayAlive sequence");
+    logDebug("Initializing stayAlive sequence");
     for (const direction of iterateDirections()) {
         const cell = position.add(direction);
 
         if (state.isCellInGrid(cell) && state.isCellFree(cell)) {
+
+            logInfo(`BEHAVIOUR: stayAlive primitive`);
             return succeed(directionToAction(direction));
         }
     }
@@ -259,8 +267,6 @@ function pickRandomPosition(state: AgentState): Vector2Int {
 
 
 function stayAliveImproved(state: AgentState): Action<AgentAction> {
-    // const agentLength = state.gameState.you.body.length;
-    // const requiredPathLength = agentLength + 1;
     let escapeRetryCount = 10
     let path: Vector2Int[] = [];
 

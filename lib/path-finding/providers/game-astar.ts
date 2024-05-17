@@ -1,4 +1,4 @@
-import { LOGLEVEL, loglevel } from "../../config";
+import { LOGLEVEL, logFun, loglevel } from "../../config";
 import { ObstacleGrid } from "../../game-ai/obstaclegrid";
 import { TeamCommunicator } from "../../game-ai/team-communicator";
 import { Vector2Int, Vector3Int } from "../../util/vectors";
@@ -54,13 +54,15 @@ export class GameAStarProvider extends GridAStarProvider {
         if(cellCountToCheck > 0){
             let currentCellsToChecks = prevNodes.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
 
-            if(loglevel <= LOGLEVEL.DEBUG && snakeLength && snakeLength===4){
-                let snakeString = "";
-                for(let cell of currentCellsToChecks){
-                    snakeString += "("+`${cell.position.x}|${cell.position.y}` + ")-";
+            logFun(LOGLEVEL.DEBUG,()=>{
+                if(snakeLength && snakeLength===4){
+                    let snakeString = "";
+                    for(let cell of currentCellsToChecks){
+                        snakeString += "("+`${cell.position.x}|${cell.position.y}` + ")-";
+                    }
+                    console.log(`Snake of length ${snakeLength} and shape at timestep ${nextNode.position.z}: ${snakeString}`);
                 }
-                console.log(`Snake of length ${snakeLength} and shape at timestep ${nextNode.position.z}: ${snakeString}`);
-            }
+            });
 
             let partOfPrevNodes = currentCellsToChecks.some(prevNode => nextNode.position.equals(prevNode.position));
 

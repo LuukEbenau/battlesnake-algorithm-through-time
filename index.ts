@@ -15,13 +15,13 @@ import { AgentManager, AgentManagerConfig } from './lib/game-ai/agent-manager';
 import runServer from './server';
 import { GameState, InfoResponse, MoveResponse } from './types';
 
-import { loglevel } from './lib/config'
+import { logInfo, loglevel } from './lib/config'
 
 // info is called when you create your Battlesnake on play.battlesnake.com
 // and controls your Battlesnake's appearance
 // TIP: If you open your Battlesnake URL in a browser you should see this data
 function info(): InfoResponse {
-  console.log("INFO");
+  logInfo("INFO");
 
   return {
     apiversion: "1",
@@ -45,12 +45,12 @@ let agentManager = new AgentManager(config);
 // start is called when your Battlesnake begins a game
 function start(gameState: GameState): void {
     agentManager = new AgentManager(config);
-    console.log("GAME START");
+    logInfo("GAME START");
 }
 
 // end is called when your Battlesnake finishes a game
 function end(gameState: GameState): void {
-    console.log("GAME OVER\n");
+    logInfo("GAME OVER\n");
 }
 
 function move(gameState: GameState): MoveResponse {
@@ -61,7 +61,7 @@ function move(gameState: GameState): MoveResponse {
 
     console.timeEnd('calculating move');
 
-    console.log(`STEP: ${move}`);
+    logInfo(`STEP: ${move}`);
     if (move == AgentAction.Continue) {
         // TODO: improve?
         console.warn("Continue move command retrieved, this shouldnt happen");

@@ -1,6 +1,6 @@
 import { Coord } from "../../types";
 
-export class Vector2Int {
+export class Vector2Int implements Coord {
     public static fromCoord(coord: Coord): Vector2Int {
         return new Vector2Int(coord.x, coord.y);
     }

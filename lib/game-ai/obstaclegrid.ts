@@ -1,6 +1,6 @@
 import { stat } from "fs";
 import { Battlesnake, Coord, GameState } from "../../types";
-import { LOGLEVEL, logToFile, loglevel } from "../config";
+import { LOGLEVEL, logDebug, logToFile, loglevel } from "../config";
 import { Vector2Int } from "../util/vectors";
 import { TeamCommunicator } from "./team-communicator";
 import * as fs from 'fs';
@@ -248,7 +248,7 @@ private addPenaltyToGridBorders(gridLayer: number[][]): number[][] {
             let x = parseInt(split[0]);
             let y = parseInt(split[1]);
             let probability = pair[1];
-            if(loglevel <= LOGLEVEL.DEBUG) console.log(`Probability of ${x}:${y} is ${probability}`)
+            logDebug(`Probability of ${x}:${y} is ${probability}`)
 
             let curVal = grid[x][y];
             grid[x][y] = curVal + (probability * this.potentialEnemyPositionCoefficientAmplifier);

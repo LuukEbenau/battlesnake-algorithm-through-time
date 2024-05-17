@@ -146,9 +146,9 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
     );
 
     // for testing
-    targets = state.gameState.board.snakes
+    /*targets = state.gameState.board.snakes
         .map(s => [s.id, s.body.map(b => Vector2Int.fromCoord(b))] as [string, Vector2Int[]])
-        .filter(([id]) => id !== state.agentId);
+        .filter(([id]) => id !== state.agentId);*/
 
     for (const [enemyId, body] of targets) {
         const cutoffPath = performCutoff(state, config, enemyId, body);

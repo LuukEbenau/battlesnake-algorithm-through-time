@@ -105,10 +105,11 @@ export class TeamCommunicator {
             yield [enemyId, body];
         }
 
-        const players = [...this.players.entries()]
+        const enemies = [...this.players.entries()]
+            .filter(([id]) => !this.teamIds.has(id))
             .sort(([aId, aBody], [bId, bBody]) => distance(aBody, bBody));
 
-        for (const [playerId, body] of players) {
+        for (const [playerId, body] of enemies) {
             const ownerId = this.enemyToOwner.get(playerId);
             const nextOwnerId = this.nextEnemyToOwner.get(playerId);
 

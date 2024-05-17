@@ -74,13 +74,73 @@ function isLongEnoughToKill(state: AgentState, config: AgentConfig): Action<Agen
     return status(state.gameState.you.body.length >= config.killLength);
 }
 
+function outOfRange(v: Vector2Int, obstacleMap: ObstacleGrid) {
+    return v.x < 0 || v.y < 0 || v.x >= obstacleMap.width || v.y >= obstacleMap.height;
+}
+
 function performCutoff(state: AgentState, config: AgentConfig, enemyBody: Vector2Int[]): Vector2Int[] {
-    return [];
+    const enemyHead = enemyBody[0];
+
+    const planeOuter = new Vector2Int(
+        enemyHead.x < state.gameState.board.width / 2 ? 1 : -1,
+        enemyHead.y < state.gameState.board.height / 2 ? 1 : -1,
+    );
+
+    const planeX = enemyHead.x + planeOuter.x * config.cutoffDistance;
+    const planeY = enemyHead.y + planeOuter.y * config.cutoffDistance;
+
+    if (planeX <= 0 || planeX >= state.obstacleMap.width - 1 || planeY <= 0 || planeY >= state.obstacleMap.height - 1) {
+        return [];
+    }
+
+    const cutoffX = new Vector2Int(planeX, planeOuter.y > 0 ? 0 : state.obstacleMap.height - 1);
+    const cutoffY = new Vector2Int(planeOuter.x > 0 ? 0 : state.obstacleMap.width - 1, planeY);
+
+    let closestFreeX = cutoffX;
+    let closestFreeY = cutoffY;
+
+    const occupiedCoords = new Set<string>();
+
+    for (const snake of state.gameState.board.snakes) {
+        for (const pos of snake.body) {
+            occupiedCoords.add(Vector2Int.fromCoord(pos).toJSONString());
+        }
+    }
+
+    while (occupiedCoords.has(closestFreeX.toJSONString())) {
+        closestFreeX = closestFreeX.add(new Vector2Int(0, planeOuter.y));
+
+        if (outOfRange(closestFreeX, state.obstacleMap)) {
+            return [];
+        }
+    }
+
+    while (occupiedCoords.has(closestFreeY.toJSONString())) {
+        closestFreeY = closestFreeY.add(new Vector2Int(planeOuter.x, 0));
+
+        if (outOfRange(closestFreeY, state.obstacleMap)) {
+            return [];
+        }
+    }
+
+    const touchXIndex = state.gameState.you.body.findIndex(b => b.x == cutoffX.x);
+    const touchYIndex = state.gameState.you.body.findIndex(b => b.y === cutoffY.y);
+
+    let firstGoal: Vector2Int;
+    let secondGoal: Vector2Int;
+
+    if (touchXIndex < touchYIndex) {
+        firstGoal = closestFreeY;
+        secondGoal = closestFreeX;
+    } else {
+        firstGoal = closestFreeX;
+        secondGoal = closestFreeY;
+    }
+
+    return state.aStar.findPath(state.currentPosition, firstGoal, secondGoal);
 }
 
 function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction> {
-    let enemy: [string, Vector2Int[]];
-
     const targets = state.teamCommunicator.iterateTargetableEnemies(
         state.agentId,
         (a, b) => a[0].distance(b[0])
@@ -96,6 +156,7 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
         const action = registerPath(state, config, cutoffPath);
 
         if (action.status) {
+            console.log("cutoff!!!");
             return action;
         }
     }
@@ -188,7 +249,7 @@ function pickRandomPosition(state: AgentState): Vector2Int {
     for (const pos of positions) {
         accumulatedWeight += (1 / pos.weight);
         if (randomValue < accumulatedWeight) {
-            return pos.position;
+            return new Vector2Int(Math.floor(pos.position.x), Math.floor(pos.position.y));
         }
     }
 

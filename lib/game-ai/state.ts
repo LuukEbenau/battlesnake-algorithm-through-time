@@ -17,11 +17,13 @@ export class GameAgentState implements AgentState {
     public readonly obstacleMap: ObstacleGrid;
 
     readonly aStar: AStar<Vector2Int>;
+    readonly aStarWithEscape: AStar<Vector2Int>;
 
     constructor(config: GameAgentStateConfig, private readonly state: GameState, public readonly teamCommunicator: TeamCommunicator) {
         this.provider = new GameAStarProvider(teamCommunicator);
         this.obstacleMap = new ObstacleGrid(state, teamCommunicator);
-        this.aStar = new StandardAStarWithEscape(this.provider, state, config.aStarMaxIterationCount);
+        this.aStar = new  StandardAStar(this.provider, config.aStarMaxIterationCount);
+        this.aStarWithEscape = new StandardAStarWithEscape(this.provider, state, config.aStarMaxIterationCount);
     }
 
     get agentId(): string {

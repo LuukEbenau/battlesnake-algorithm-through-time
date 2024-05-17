@@ -16,6 +16,7 @@ import { log } from "console";
 export interface AgentState {
     readonly obstacleMap: ObstacleGrid;
     readonly aStar: AStar<Vector2Int>;
+    readonly aStarWithEscape: AStar<Vector2Int>;
     readonly teamCommunicator: TeamCommunicator;
     get agentId(): string;
     get gameState(): GameState;
@@ -173,7 +174,7 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
 }
 
 function registerMove(state: AgentState, config: AgentConfig, target: Vector2Int): Action<AgentAction> {
-    return registerPath(state, config, state.aStar.findPath(state.currentPosition, target));
+    return registerPath(state, config, state.aStarWithEscape.findPath(state.currentPosition, target));
 }
 
 function registerPath(state: AgentState, config: AgentConfig, path: Vector2Int[]): Action<AgentAction> {
@@ -287,7 +288,7 @@ function stayAliveImproved(state: AgentState): Action<AgentAction> {
 
         i++;
 
-        path = state.aStar.findPath(state.currentPosition, randomPosition);
+        path = state.aStarWithEscape.findPath(state.currentPosition, randomPosition);
 
         if (path.length >= 2) {
             break;

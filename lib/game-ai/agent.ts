@@ -79,13 +79,10 @@ function outOfRange(v: Vector2Int, obstacleMap: ObstacleGrid) {
     return v.x < 0 || v.y < 0 || v.x >= obstacleMap.width || v.y >= obstacleMap.height;
 }
 
-function performCutoff(state: AgentState, config: AgentConfig, enemyBody: Vector2Int[]): Vector2Int[] {
+function performCutoff(state: AgentState, config: AgentConfig, enemyId: string, enemyBody: Vector2Int[]): Vector2Int[] {
     const enemyHead = enemyBody[0];
 
-    const planeOuter = new Vector2Int(
-        enemyHead.x < state.gameState.board.width / 2 ? 1 : -1,
-        enemyHead.y < state.gameState.board.height / 2 ? 1 : -1,
-    );
+    const planeOuter = state.teamCommunicator.calcEnemyCutoffPlaneOuter(enemyId, enemyHead, state.gameState.board.width, state.gameState.board.height);
 
     const planeX = enemyHead.x + planeOuter.x * config.cutoffDistance;
     const planeY = enemyHead.y + planeOuter.y * config.cutoffDistance;
@@ -142,13 +139,18 @@ function performCutoff(state: AgentState, config: AgentConfig, enemyBody: Vector
 }
 
 function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction> {
-    const targets = state.teamCommunicator.iterateTargetableEnemies(
+    let targets = state.teamCommunicator.getTargetableEnemies(
         state.agentId,
         (a, b) => a[0].distance(b[0])
     );
 
+    // for testing
+    targets = state.gameState.board.snakes
+        .map(s => [s.id, s.body.map(b => Vector2Int.fromCoord(b))] as [string, Vector2Int[]])
+        .filter(([id]) => id !== state.agentId);
+
     for (const [enemyId, body] of targets) {
-        const cutoffPath = performCutoff(state, config, body);
+        const cutoffPath = performCutoff(state, config, enemyId, body);
 
         if (cutoffPath.length < 2) {
             continue;
@@ -157,6 +159,8 @@ function cutoffEnemy(state: AgentState, config: AgentConfig): Action<AgentAction
         const action = registerPath(state, config, cutoffPath);
 
         if (action.status) {
+            state.teamCommunicator.targetEnemy(state.agentId, enemyId);
+
             logFun(LOGLEVEL.INFO, ()=>{
                 let cutoffTarget = cutoffPath[cutoffPath.length-1];
                 logInfo(`BEHAVIOUR: CUTOFF | goal: ${cutoffTarget.x}: ${cutoffTarget.y}`);

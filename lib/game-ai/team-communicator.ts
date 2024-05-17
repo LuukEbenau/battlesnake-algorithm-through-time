@@ -16,6 +16,9 @@ export class TeamCommunicator {
     private enemyToOwner = new Map<string, string>();
     private nextEnemyToOwner = new Map<string, string>();
 
+    private enemyCutoffOuter = new Map<string, Vector2Int>();
+    private nextEnemyCutoffOuter = new Map<string, Vector2Int>();
+
     constructor(private readonly maxCutoffAgents: number) {
     }
 
@@ -38,6 +41,9 @@ export class TeamCommunicator {
 
         this.enemyToOwner = this.nextEnemyToOwner;
         this.nextEnemyToOwner = new Map();
+
+        this.enemyCutoffOuter = this.nextEnemyCutoffOuter;
+        this.nextEnemyCutoffOuter = new Map();
     }
     *iterateAvailableFoods(agentId: string): IterableIterator<Vector2Int> {
         for (const food of this.foods) {
@@ -127,5 +133,18 @@ export class TeamCommunicator {
     }
     targetEnemy(agentId: string, enemyId: string): void {
         this.nextEnemyToOwner.set(enemyId, agentId);
+    }
+    calcEnemyCutoffPlaneOuter(enemyId: string, enemyHead: Vector2Int, boardWidth: number, boardHeight: number): Vector2Int {
+        let planeOuter = this.enemyCutoffOuter.get(enemyId);
+
+        if (planeOuter === undefined) {
+            planeOuter = new Vector2Int(
+                enemyHead.x < boardWidth / 2 ? 1 : -1,
+                enemyHead.y < boardHeight / 2 ? 1 : -1,
+            );
+            this.nextEnemyCutoffOuter.set(enemyId, planeOuter);
+        }
+
+        return planeOuter;
     }
 }

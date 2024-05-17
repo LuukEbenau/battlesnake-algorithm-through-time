@@ -14,6 +14,7 @@ import { AgentAction } from './lib/game-ai/agent';
 import { AgentManager, AgentManagerConfig } from './lib/game-ai/agent-manager';
 import runServer from './server';
 import { GameState, InfoResponse, MoveResponse } from './types';
+import fs from 'fs';
 
 import { logInfo, loglevel } from './lib/config'
 
@@ -41,6 +42,8 @@ const config: AgentManagerConfig = {
     maxAgentsPerformingCutoff: 1,
 };
 let agentManager = new AgentManager(config);
+
+fs.mkdirSync('logs', { recursive: true });
 
 // start is called when your Battlesnake begins a game
 function start(gameState: GameState): void {

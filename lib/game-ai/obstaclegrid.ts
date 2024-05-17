@@ -1,6 +1,6 @@
 import { stat } from "fs";
 import { Battlesnake, Coord, GameState } from "../../types";
-import { LOGLEVEL, loglevel } from "../config";
+import { LOGLEVEL, logToFile, loglevel } from "../config";
 import { Vector2Int } from "../util/vectors";
 import { TeamCommunicator } from "./team-communicator";
 import * as fs from 'fs';
@@ -34,7 +34,7 @@ export class ObstacleGrid{
                 this.grid[i] = this.createGridLayer(i,this.width, this.height, this.state?.board.snakes as Battlesnake[])
             }
 
-            if(t == 1 && loglevel <= LOGLEVEL.DEBUG){
+            if(t == 1 && logToFile){
                 this.writeToFile(t);
             }
         }
@@ -86,13 +86,44 @@ export class ObstacleGrid{
                 //is self
             }
             // opposition principle: if our head and enemy head are both adjacent to a food item, we only want to go there if our snake size is bigger than theirs.
-
         }
+
+        this.addPenaltyToGridBorders(gridLayer);
 
         return gridLayer;
     }
 
+/**
+ * This function gives a penalty to the outermost grid cells of the obstacle grid.
+ * The purpose of this is that the borders of the grid are usually the most dangerous,
+ * so this way the danger is avoided unless needed.
+ * @param gridLayer A layer of the grid at a given timestep
+ * @returns same grid with an added penalty multiplier of *1.15 for the outer circle, and 1.075 for the second-outer circle
+ */
+private addPenaltyToGridBorders(gridLayer: number[][]): number[][] {
+    const rows = gridLayer.length;
+    const cols = gridLayer[0].length;
 
+    // Apply penalty to the outermost circle
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (i === 0 || i === rows - 1 || j === 0 || j === cols - 1) {
+                gridLayer[i][j] *= 1.15;
+            }
+        }
+    }
+
+    // Apply penalty to the second-outer circle
+    for (let i = 1; i < rows - 1; i++) {
+        for (let j = 1; j < cols - 1; j++) {
+            if (i === 1 || i === rows - 2 || j === 1 || j === cols - 2) {
+                gridLayer[i][j] *= 1.075;
+            }
+        }
+    }
+
+    return gridLayer;
+}
     private generateSymbolGrid(t:number): string[][] {
         let transposedGrid = this.getGridAtTime(t).map((_, colIndex) => this.getGridAtTime(t).map(row => row[colIndex])).reverse();
         return transposedGrid.map(row =>

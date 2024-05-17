@@ -25,15 +25,15 @@ function info(): InfoResponse {
 
   return {
     apiversion: "1",
-    author: "",       // TODO: Your Battlesnake Username
-    color: "#888888", // TODO: Choose color
-    head: "default",  // TODO: Choose head
-    tail: "default",  // TODO: Choose tail
+    author: "Luuk&Adrian",       // TODO: Your Battlesnake Username
+    color: "#880808", // TODO: Choose color
+    head: "tongue",  // TODO: Choose head
+    tail: "pixel",  // TODO: Choose tail
   };
 }
 
 const config: AgentManagerConfig = {
-    aStarMaxIterationCount: 3500,
+    aStarMaxIterationCount: 2500,
     wellFedHealth: 51,
     killLength: 10,
     escapeRetryCount: 5,
@@ -62,9 +62,9 @@ function move(gameState: GameState): MoveResponse {
     console.timeEnd('calculating move');
 
     console.log(`STEP: ${move}`);
-
     if (move == AgentAction.Continue) {
         // TODO: improve?
+        console.warn("Continue move command retrieved, this shouldnt happen");
         move = AgentAction.Right;
     }
 

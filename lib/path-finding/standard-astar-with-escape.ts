@@ -48,17 +48,17 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
 
         let timestepsToSurvive = bodyLength;
 
-        if(loglevel <= LOGLEVEL.INFO) console.log(`Trying to find an escape path from timestep ${lastTimeStep} for ${timestepsToSurvive} timesteps`);
+        if(loglevel <= LOGLEVEL.INFO) console.log(`Turn ${this.state.turn}: Trying to find an escape path from timestep ${lastTimeStep} for ${bodyLength} timesteps`);
 
         nodeStore = new Map<TNodeId, TNode>();
         nodeStore.set(this.provider.getId(lastPos), lastPos); // if i dont do it it crashes?
 
         //TODO: PROBLEM WITH ESCAPE PATH: right now it only checks one entrance of the 4 possible entrances to get to the goal node. What we would want to do is consider all 4 possible entrance paths. This way, it will not block its escape path.
 
-        let escapePathFound : boolean = this.findIfEscapePathIsAvailable(this.provider.getId(lastPos), timestepsToSurvive, nodeStore, cameFrom);
+        let escapePathFound : boolean = this.findIfEscapePathIsAvailable(this.provider.getId(lastPos), lastTimeStep+timestepsToSurvive, nodeStore, cameFrom);
 
         if(!escapePathFound){
-            if(loglevel <= LOGLEVEL.INFO) console.log("No escape path found after gathering food, finding alternative routes...");
+            if(loglevel <= LOGLEVEL.INFO) console.log(`Turn ${this.state.turn}: No escape path found after gathering food, finding alternative routes...`);
             return [];
         }
 
@@ -72,7 +72,6 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
     private findIfEscapePathIsAvailable(startNodeId: TNodeId, goalTimeStep:number, nodeStore: Map<TNodeId, TNode>, cameFrom: Map<TNodeId, TNodeId>) : boolean {
         const openSet = new PriorityQueue<TNodeId>();
         let startNode = this.safeGet(nodeStore, startNodeId);
-        const startFScore = -1;
 
         // to encourage breath first searching, it takes elements with highest distance first
         openSet.clear();

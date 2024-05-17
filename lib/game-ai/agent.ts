@@ -2,7 +2,7 @@ import { BehaviorTreeBuilder } from "../behavior-tree/builder";
 import { Action, Behavior } from "../behavior-tree";
 import { and, fail, fallback, ite, status, succeed, treeFail } from "../behavior-tree/tasks";
 import { AStar } from "../path-finding";
-import { Vector2Int } from "../util/vectors";
+import { Vector2, Vector2Int } from "../util/vectors";
 import { GameState } from "../../types";
 import { iterateDirections } from "../util/grid";
 import { TeamCommunicator } from "./team-communicator";
@@ -62,6 +62,7 @@ function directionToAction(direction: Vector2Int): AgentAction {
             return AgentAction.Up;
         }
     }
+    console.warn(`Direction is ${direction.x}:${direction.y}, this should not happen`)
     return AgentAction.Continue;
 }
 
@@ -162,7 +163,7 @@ function stayAlive(state: AgentState): Action<AgentAction> {
  */
 function pickRandomPosition(state: AgentState): Vector2Int {
     const { width, height } = state.gameState.board;
-    const center = new Vector2Int(width / 2, height / 2);
+    const center = new Vector2(width / 2, height / 2);
 
     // Create an array of all positions with their weights
     const positions: { position: Vector2Int; weight: number }[] = [];

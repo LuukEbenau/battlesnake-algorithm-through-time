@@ -18,7 +18,7 @@ export class GameAgentState implements AgentState {
 
     readonly aStar: AStar<Vector2Int>;
 
-    constructor(config: GameAgentStateConfig, private state: GameState, public readonly teamCommunicator: TeamCommunicator) {
+    constructor(config: GameAgentStateConfig, private readonly state: GameState, public readonly teamCommunicator: TeamCommunicator) {
         this.provider = new GameAStarProvider(teamCommunicator);
         this.obstacleMap = new ObstacleGrid(state, teamCommunicator);
         this.aStar = new StandardAStarWithEscape(this.provider, state, config.aStarMaxIterationCount);
@@ -32,9 +32,13 @@ export class GameAgentState implements AgentState {
         return this.state;
     }
 
-    updateState(state: GameState): void {
-        this.state = state;
-        this.obstacleMap.createInitialGrid(state.board.width,state.board.height, state);
+    updateState(newState: GameState): void {
+        this.state.board = newState.board;
+        this.state.game = newState.game;
+        this.state.turn = newState.turn;
+        this.state.you = newState.you;
+        // this.state = state;
+        this.obstacleMap.createInitialGrid(this.state.board.width,this.state.board.height, this.state);
 
         this.provider.updateState(this.obstacleMap);
     }

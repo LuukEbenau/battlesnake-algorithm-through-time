@@ -5,13 +5,16 @@ export class Vector2Int {
         return new Vector2Int(coord.x, coord.y);
     }
 
+    protected typeCheck(){
+		if(this.x % 1 >0){
+			throw new Error(`While initializing Vector2Int, x value of ${this.x} was not a integer`);
+		}
+		if(this.y % 1 >0){
+			throw new Error(`While initializing Vector2Int, y value of ${this.y} was not a integer`);
+		}
+    }
 	public constructor(public readonly x:number,public readonly y:number){
-		if( x % 1 >0){
-			throw new Error(`While initializing Vector2Int, x value of ${x} was not a integer`);
-		}
-		if(y % 1 >0){
-			throw new Error(`While initializing Vector2Int, y value of ${y} was not a integer`);
-		}
+        this.typeCheck();
 	}
 
 	public equals(v2: Vector2Int): boolean {
@@ -42,6 +45,14 @@ export class Vector2Int {
         return new Vector2Int(vector.x, vector.y);
     }
 }
+
+export class Vector2 extends Vector2Int{
+    protected override typeCheck(){
+
+        // dont do anything here, since we dont care about rounding
+    }
+}
+
 
 /**
  * The x and y represent the grid, the z axis represents the time dimension

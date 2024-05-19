@@ -9,8 +9,8 @@ export class ObstacleGrid{
     private readonly snakeBodyPenalty = 20000 // some high number, as long as its >10000 it should be fine
     private readonly friendlySnakePathCollisionPenalty = 200;
     private readonly snakeOppositionPenalty = 100
-    private readonly potentialEnemyPositionCoefficientAmplifier = 10; // probably lower?
-
+    private readonly potentialEnemyPositionCoefficientAmplifier = 4; // probably lower?
+    private readonly hazardCoefficient :number = 13;
     public width = 0;
     public height = 0;
     private grid: number[][][];
@@ -61,6 +61,8 @@ export class ObstacleGrid{
         }
         // Own positions of snakes
         let ownHead = this.state.you.head;
+
+        this.addHazards(gridLayer);
 
         for (const snake of snakes) {
             let isSelf: boolean = snake.head.x == ownHead.x && snake.head.y == ownHead.y;
@@ -252,6 +254,13 @@ private addPenaltyToGridBorders(gridLayer: number[][]): number[][] {
 
             let curVal = grid[x][y];
             grid[x][y] = curVal + (probability * this.potentialEnemyPositionCoefficientAmplifier);
+        }
+    }
+
+
+    private addHazards(grid:number[][]){
+        for (var hazard of this.state.board.hazards){
+            grid[hazard.x][hazard.y] += this.hazardCoefficient;
         }
     }
 

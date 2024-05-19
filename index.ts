@@ -11,12 +11,12 @@
 // For more info see docs.battlesnake.com
 
 import { AgentAction } from './lib/game-ai/agent';
-import { AgentManager, AgentManagerConfig } from './lib/game-ai/agent-manager';
 import runServer from './server';
 import { GameState, InfoResponse, MoveResponse } from './types';
 import fs from 'fs';
 
-import { logInfo, loglevel } from './lib/config'
+import { logInfo } from './lib/config'
+import { GameManager, GameManagerConfig } from './lib/game-ai/game-manager';
 
 // info is called when you create your Battlesnake on play.battlesnake.com
 // and controls your Battlesnake's appearance
@@ -33,7 +33,7 @@ function info(): InfoResponse {
   };
 }
 
-const config: AgentManagerConfig = {
+const config: GameManagerConfig = {
     aStarMaxIterationCount: 2500,
     wellFedHealth: 51,
     killLength: 10,
@@ -42,7 +42,7 @@ const config: AgentManagerConfig = {
     maxAgentsPerformingCutoff: 1,
     enableCutoff: false,
 };
-const gameManager = new AgentManager(config);
+const gameManager = new GameManager(config);
 
 fs.mkdirSync('logs', { recursive: true });
 
@@ -54,6 +54,7 @@ function start(gameState: GameState): void {
 // end is called when your Battlesnake finishes a game
 function end(gameState: GameState): void {
     logInfo("GAME OVER\n");
+    gameManager.clear(gameState);
 }
 
 function move(gameState: GameState): MoveResponse {

@@ -42,13 +42,12 @@ const config: AgentManagerConfig = {
     maxAgentsPerformingCutoff: 1,
     enableCutoff: false,
 };
-let agentManager = new AgentManager(config);
+const gameManager = new AgentManager(config);
 
 fs.mkdirSync('logs', { recursive: true });
 
 // start is called when your Battlesnake begins a game
 function start(gameState: GameState): void {
-    agentManager = new AgentManager(config);
     logInfo("GAME START");
 }
 
@@ -60,8 +59,8 @@ function end(gameState: GameState): void {
 function move(gameState: GameState): MoveResponse {
     console.time('calculating move');
 
-    agentManager.tick(gameState);
-    let move = agentManager.performAction(gameState);
+    gameManager.tick(gameState);
+    let move = gameManager.performAction(gameState);
 
     console.timeEnd('calculating move');
 

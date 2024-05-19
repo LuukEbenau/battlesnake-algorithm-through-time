@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "prestart": "npm run build",
-    "start": "node ./build/index.js",
+    "start": "set PORT=8000 && node ./build/index.js",
+    "start2": "set PORT=8001 && node ./build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

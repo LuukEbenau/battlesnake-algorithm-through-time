@@ -51,7 +51,9 @@ battlesnake play -W 11 -H 11 --name 'TypeScript Starter Project' --url http://lo
 ```
 Or run as team with
 ```
-battlesnake play -W 20 -H 20 --browser --name Luuk --url http://localhost:8000 --name Adrian --url http://localhost:8000  --name Noob1 --url http://localhost:8000 --name Noob2 --url http://localhost:8000
+npm run start
+npm rum start1
+battlesnake play -W 20 -H 20 --browser --name Luuk --url http://localhost:8000 --name Adrian --url http://localhost:8000  --name Noob1 --url http://localhost:8001 --name Noob2 --url http://localhost:8001
 ```
 
 

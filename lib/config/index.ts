@@ -7,7 +7,7 @@ export enum LOGLEVEL{
     WARNING=3,
     ERROR=4
 }
-export const loglevel = LOGLEVEL.INFO; // 1 is log, 2 is warning, 3 is error. putting on 0 will have no logs
+export const loglevel = LOGLEVEL.WARNING; // 1 is log, 2 is warning, 3 is error. putting on 0 will have no logs
 export const logToFile = true;
 
 export function logConsole(severity: LOGLEVEL, ...args:string[]){

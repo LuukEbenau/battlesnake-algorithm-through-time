@@ -56,7 +56,7 @@ export class GameAStarProvider extends GridAStarProvider {
         if(cellCountToCheck > 0){
             let currentCellsToChecks = prevNodes.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
 
-            logFun(LOGLEVEL.DEBUG,()=>{
+            logFun(LOGLEVEL.DEBUG, () => {
                 if(snakeLength && snakeLength === 4){
                     let snakeString = "";
                     for(let cell of currentCellsToChecks){

@@ -34,6 +34,7 @@ export interface AgentConfig {
     readonly escapeRetryCount: number;
     readonly cutoffDistance: number;
     readonly maxAgentsPerformingCutoff: number;
+    readonly enableCutoff: boolean;
 }
 
 /**
@@ -305,6 +306,10 @@ function stayAliveImproved(state: AgentState): Action<AgentAction> {
     return succeed(directionToAction(direction));
 }
 
+function isCutoffEnabled(_: AgentState, config: AgentConfig): Action<AgentAction> {
+    return status(config.enableCutoff);
+}
+
 export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentAction> {
     const tree = new BehaviorTreeBuilder<AgentState, AgentAction, AgentConfig>(AgentAction.Continue);
 
@@ -312,7 +317,7 @@ export function defineAgent(config: AgentConfig): Behavior<AgentState, AgentActi
         'root',
         fallback(
             ite(
-                and(isWellFed, isLongEnoughToKill),
+                and(isCutoffEnabled, isWellFed, isLongEnoughToKill),
                 cutoffEnemy,
             ),
             eatFood,

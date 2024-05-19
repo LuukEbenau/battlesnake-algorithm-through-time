@@ -10,7 +10,7 @@ export class ObstacleGrid{
     private readonly friendlySnakePathCollisionPenalty = 200;
     private readonly snakeOppositionPenalty = 100
     private readonly potentialEnemyPositionCoefficientAmplifier = 4; // probably lower?
-    private readonly hazardCoefficient :number = 13;
+    private readonly hazardCoefficient :number = 5;
     public width = 0;
     public height = 0;
     private grid: number[][][];

@@ -40,7 +40,7 @@ const config: AgentManagerConfig = {
     escapeRetryCount: 5,
     cutoffDistance: 2,
     maxAgentsPerformingCutoff: 1,
-    enableCutoff: false,
+    enableCutoff: true,
 };
 let agentManager = new AgentManager(config);
 

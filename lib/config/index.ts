@@ -15,10 +15,10 @@ export function logConsole(severity: LOGLEVEL, ...args:string[]){
         console.log(args);
     }
 }
-export function logInfo(...args:string[]){ return logConsole(LOGLEVEL.INFO); }
-export function logDebug(...args:string[]){ return logConsole(LOGLEVEL.DEBUG); }
-export function logWarning(...args:string[]){ return logConsole(LOGLEVEL.WARNING); }
-export function logError(...args:string[]){ return logConsole(LOGLEVEL.ERROR); }
+export function logInfo(...args:string[]){ return logConsole(LOGLEVEL.INFO, ...args); }
+export function logDebug(...args:string[]){ return logConsole(LOGLEVEL.DEBUG, ...args); }
+export function logWarning(...args:string[]){ return logConsole(LOGLEVEL.WARNING, ...args); }
+export function logError(...args:string[]){ return logConsole(LOGLEVEL.ERROR, ...args); }
 
 export function logFun(severity: LOGLEVEL, fun: (...args: any[]) => void, ...args:any[]){
     if(loglevel <= severity){

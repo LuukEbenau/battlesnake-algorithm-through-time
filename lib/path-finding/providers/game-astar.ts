@@ -41,21 +41,23 @@ export class GameAStarProvider extends GridAStarProvider {
      * @param nextNode The node which we are checking right now, so a possible new cell for the snake head
      * @returns
      */
-    private NodeIsPartOfCurrentPath(curNode:GridAStarNode, nextNode: GridAStarNode) : boolean{
+    private NodeIsPartOfCurrentPath(curNode: GridAStarNode, nextNode: GridAStarNode) : boolean{
         // For now, check if node is part of path. If this is true, don't consider it
         let prevNodes = this.getPrevCellsInPath(curNode);
         let currentPathLength = prevNodes.length;
-        let snakeLength = this.obstacleMap.state.you.body.length;
+        let snakeLength = this.obstacleMap.state.you.body.length; //TODO: if it eats a food, it has 1 tick delay of updating the tail
 
         // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
+        // 10 - 6 = 4
+        //  10 - 4 = 6
         let numToSkip = currentPathLength - (snakeLength as number);
-        if(numToSkip <0) numToSkip = 0;
+        if(numToSkip < 0) numToSkip = 0;
         let cellCountToCheck = currentPathLength - numToSkip;
         if(cellCountToCheck > 0){
             let currentCellsToChecks = prevNodes.slice(0, cellCountToCheck)// only the cells occupied by the snake at the current timestep
 
             logFun(LOGLEVEL.DEBUG,()=>{
-                if(snakeLength && snakeLength===4){
+                if(snakeLength && snakeLength === 4){
                     let snakeString = "";
                     for(let cell of currentCellsToChecks){
                         snakeString += "("+`${cell.position.x}|${cell.position.y}` + ")-";

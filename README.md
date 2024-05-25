@@ -1,5 +1,5 @@
 # Battlesnake AI Using A* algorithm through time
-This project contains an AI for battlesnake ([https://play.battlesnake.com/](https://play.battlesnake.com. What sets the AI which we've developed apart is that we incorporate a time dimension into the A* algorithm. Instead of generating paths on a 2d grid, the A* algorithm instead traverses through a third dimension 'time'. This enables the snake to know where itself and friendly snakes are going to be at each specific point in time, and allows the snake to plan a path through time. This is all possible due to the turn-based nature of the game.
+This project contains an AI for battlesnake [https://play.battlesnake.com/](https://play.battlesnake.com). What sets the AI which we've developed apart is that we incorporate a time dimension into the A* algorithm. Instead of generating paths on a 2d grid, the A* algorithm instead traverses through a third dimension 'time'. This enables the snake to know where itself and friendly snakes are going to be at each specific point in time, and allows the snake to plan a path through time. This is all possible due to the turn-based nature of the game.
 
 # example game
 ![battlesnake_game](https://github.com/LuukEbenau/battlesnake-algorithm-through-time/assets/45255779/0f2d2469-d27a-4988-88c0-c44c7cbe4af0)

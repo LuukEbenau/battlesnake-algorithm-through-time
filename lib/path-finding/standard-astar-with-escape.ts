@@ -2,6 +2,7 @@ import { AStar, AStarProvider } from ".";
 import { GameState } from "../../types";
 import { LOGLEVEL, logInfo, loglevel } from "../config";
 import { PriorityQueue } from "../util/priority-queue";
+import { GameAStarProvider } from "./providers/game-astar";
 import { GridAStarNode } from "./providers/grid-astar";
 
 export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId> implements AStar<TData> {
@@ -36,7 +37,8 @@ export class StandardAStarWithEscape<TData, TNode extends GridAStarNode, TNodeId
         if (path.length === 0) {
             return [];
         }
-
+        let gameprov = this.provider as unknown as GameAStarProvider;
+        gameprov.snakeExtraLength += 1;
 
         //Now, we need to check if we can still escape from this point forward. To do this, we can simply clear the openset to only contain the surrounding nodes, and see if it can survive.
         let lastPos = path[path.length-1];

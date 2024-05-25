@@ -66,10 +66,10 @@ export class Vector3Int extends Vector2Int{
 		super(x,y)
 	}
 
-	public equals(v3: Vector3Int): boolean {
+	public equals(v3: Vector3Int, useTime:boolean = true): boolean {
         //TODO: whould we also do equality check the z axis? this might give side effects so be careful
 		return this.x === v3.x && this.y === v3.y &&
-            (v3.z == 0 || this.z == 0 || this.z == v3.z);
+            (!useTime || (v3.z == 0 || this.z == 0 || this.z == v3.z));
             //NOTE: z is the timestep, so basically we will evaluate a cell again for each timestep, except if the z is 0, in which case we dont consider time. This is handy for the equality check for for example the goalPos
 
 	}

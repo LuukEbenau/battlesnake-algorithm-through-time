@@ -8,6 +8,13 @@ export class GameAStarProvider extends GridAStarProvider {
 
     /**format is [t][x][y] */
     private _maxHeuristicValue : number = 10000; // maximum heuristic value possible before a node is not searchable.
+
+    /**
+     * When food is eaten, we can trick the algorithm in this way to calculate a longer tail
+     * TODO: we can make this better, by storing this on the node, and then incrementing it whenever a food item is encountered. In this way, even when escaping this can be taken into account
+     */
+    public snakeExtraLength: number = 0;
+
     obstacleMap!: ObstacleGrid;
 
     constructor(private readonly teamCommunicator: TeamCommunicator) {
@@ -45,12 +52,12 @@ export class GameAStarProvider extends GridAStarProvider {
         // For now, check if node is part of path. If this is true, don't consider it
         let prevNodes = this.getPrevCellsInPath(curNode);
         let currentPathLength = prevNodes.length;
-        let snakeLength = this.obstacleMap.state.you.body.length; //TODO: if it eats a food, it has 1 tick delay of updating the tail
+        let snakeLength = this.obstacleMap.state.you.body.length + this.snakeExtraLength; //TODO: if it eats a food, it has 1 tick delay of updating the tail
 
         // WHICH of the coords of the previous path should we treat as a obstacle? only obstacles which will still be blocked at this moment in time.
         // 10 - 6 = 4
         //  10 - 4 = 6
-        let numToSkip = currentPathLength - (snakeLength as number);
+        let numToSkip = currentPathLength - snakeLength;
         if(numToSkip < 0) numToSkip = 0;
         let cellCountToCheck = currentPathLength - numToSkip;
         if(cellCountToCheck > 0){
@@ -66,7 +73,7 @@ export class GameAStarProvider extends GridAStarProvider {
                 }
             });
 
-            let partOfPrevNodes = currentCellsToChecks.some(prevNode => nextNode.position.equals(prevNode.position));
+            let partOfPrevNodes = currentCellsToChecks.some(prevNode => nextNode.position.equals(prevNode.position, false));
 
             if(partOfPrevNodes){
                 return true;

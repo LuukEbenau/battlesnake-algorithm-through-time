@@ -1,10 +1,8 @@
-# Battlesnake TypeScript Starter Project
+# Battlesnake AI Using A* algorithm through time
+This project contains an AI for battlesnake ([https://play.battlesnake.com/](https://play.battlesnake.com. What sets the AI which we've developed apart is that we incorporate a time dimension into the A* algorithm. Instead of generating paths on a 2d grid, the A* algorithm instead traverses through a third dimension 'time'. This enables the snake to know where itself and friendly snakes are going to be at each specific point in time, and allows the snake to plan a path through time. This is all possible due to the turn-based nature of the game.
 
-An official Battlesnake template written in TypeScript. Get started at [play.battlesnake.com](https://play.battlesnake.com).
+![battlesnake game](imgs/vFKqnCdLPNOKc/battlesnake_game.gif)
 
-![Battlesnake Logo](https://media.battlesnake.com/social/StarterSnakeGitHubRepos_TypeScript.png)
-
-This project is a great starting point for anyone wanting to program their first Battlesnake in TypeScript. It can be run locally or easily deployed to a cloud provider of your choosing. See the [Battlesnake API Docs](https://docs.battlesnake.com/api) for more detail. 
 
 [![Run on Replit](https://repl.it/badge/github/BattlesnakeOfficial/starter-snake-typescript)](https://replit.com/@Battlesnake/starter-snake-typescript)
 
